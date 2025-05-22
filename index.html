@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <title>LapPick - Rekomendasi Laptop</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+</head>
+<body class="bg-light">
+  <div class="container py-5">
+    <h1 class="mb-4">🎯 Rekomendasi Laptop</h1>
+    
+    <div class="mb-3">
+      <input type="text" id="inputTeks" class="form-control" placeholder="Masukkan kebutuhan Anda, misalnya: 'Saya ingin laptop gaming dengan budget 10 juta'" />
+    </div>
+    <button class="btn btn-primary" onclick="dapatkanRekomendasi()">Dapatkan Rekomendasi</button>
+
+    <div id="hasil" class="mt-4"></div>
+  </div>
+
+  <script>
+    async function dapatkanRekomendasi() {
+      const teks = document.getElementById("inputTeks").value;
+      const hasilDiv = document.getElementById("hasil");
+      hasilDiv.innerHTML = "🔄 Sedang memproses...";
+
+      try {
+        const response = await fetch(`http://localhost:5000/rekomendasi?teks=${encodeURIComponent(teks)}`);
+        const data = await response.json();
+
+        if (data.rekomendasi && data.rekomendasi.length > 0) {
+          let html = `<p><strong>Kategori:</strong> ${data.label_prediksi}</p>`;
+          html += `<table class="table table-striped"><thead><tr><th>Brand</th><th>Model</th><th>CPU</th><th>RAM</th><th>GPU</th><th>Harga</th></tr></thead><tbody>`;
+
+          data.rekomendasi.forEach(laptop => {
+            html += `<tr>
+              <td>${laptop.Brand}</td>
+              <td>${laptop.Model}</td>
+              <td>${laptop.CPU}</td>
+              <td>${laptop.RAM} GB</td>
+              <td>${laptop.GPU || '-'}</td>
+              <td>Rp ${laptop["Final Price"].toLocaleString("id-ID")}</td>
+            </tr>`;
+          });
+
+          html += `</tbody></table>`;
+          hasilDiv.innerHTML = html;
+        } else {
+          hasilDiv.innerHTML = "<p class='text-danger'>Tidak ada laptop yang cocok ditemukan.</p>";
+        }
+      } catch (err) {
+        hasilDiv.innerHTML = "<p class='text-danger'>Terjadi kesalahan saat mengambil data.</p>";
+        console.error(err);
+      }
+    }
+  </script>
+</body>
+</html>

@@ -1,4 +1,5 @@
 from flask import Flask, request, jsonify
+from flask_cors import CORS
 import re
 import pandas as pd
 import numpy as np
@@ -34,18 +35,43 @@ def rekomendasi(teks_user, top_n=5):
     label = label_encoder.inverse_transform([label_index])[0]
 
     df = df_laptop.copy()
-    if label == 'gaming':
-        df = df[(df['RAM'] >= 8) & df['GPU'].str.contains("RTX|GTX|Radeon", na=False, case=False)]
-    elif label == 'desain':
-        df = df[(df['RAM'] >= 8) & 
-                df['Storage'] >= 256 &
-                df['CPU'].str.contains("i5|i7|Ryzen 5|Ryzen 7", na=False, case=False) &
-                df['GPU'].str.contains("RTX|GTX|Radeon", na=False, case=False)]
-    elif label == 'kantor':
-        df = df[(df['RAM'] >= 4) & (df['Storage'] >= 256)]
-    else:
-        df = df[df['RAM'] >= 4]
 
+    # 🎮 Kategori Gaming
+    if label == 'gaming':
+        df = df[
+            (df['RAM'] >= 8) &
+            (df['GPU'].str.contains("RTX|GTX|Radeon", na=False, case=False)) &
+            (df['CPU'].str.contains("i5|i7|Ryzen 5|Ryzen 7|Ryzen 9|i9", na=False, case=False)) &
+            (df['Storage'] >= 512)
+        ]
+
+    # 🎨 Kategori Desain Grafis
+    elif label == 'desain':
+        df = df[
+            (df['RAM'] >= 16) &  # Desain butuh RAM tinggi
+            (df['Storage'] >= 512) &
+            (df['CPU'].str.contains("i7|i9|Ryzen 7|Ryzen 9", na=False, case=False)) &
+            (df['GPU'].str.contains("RTX|GTX|Radeon|MX", na=False, case=False))  # Bisa MX series juga
+        ]
+
+    # 🧑‍💼 Kategori Kantor/Produktivitas
+    elif label == 'kantor':
+        df = df[
+            (df['RAM'] >= 8) &
+            (df['Storage'] >= 256) &
+            (df['CPU'].str.contains("i3|i5|Ryzen 3|Ryzen 5|Pentium|Celeron", na=False, case=False)) &
+            (df['GPU'].isna() | df['GPU'].str.contains("integrated|intel|amd", na=False, case=False))
+        ]
+
+    # 🧍 Kategori Umum
+    else:  # 'umum'
+        df = df[
+            (df['RAM'] >= 4) &
+            (df['Storage'] >= 128) &
+            (df['CPU'].str.contains("i3|Pentium|Celeron|Ryzen 3", na=False, case=False))
+        ]
+
+    # 💰 Filter berdasarkan budget
     budget = ekstrak_budget(teks_user)
     if budget:
         df = df[df['Final Price'] <= budget]
@@ -55,7 +81,7 @@ def rekomendasi(teks_user, top_n=5):
 
 # === Flask App ===
 app = Flask(__name__)
-
+CORS(app)
 @app.route("/rekomendasi", methods=["GET"])
 def api_rekomendasi():
     teks = request.args.get("teks")
