@@ -36,48 +36,62 @@ def rekomendasi(teks_user, top_n=5):
 
     df = df_laptop.copy()
 
-    # 🎮 Kategori Gaming
+    # GPU keywords untuk deteksi gaming/desain
+    gpu_keywords = r"RTX|GTX|Radeon|GeForce"
+
+    # 🎮 Gaming
     if label == 'gaming':
         df = df[
             (df['RAM'] >= 8) &
-            (df['GPU'].str.contains("RTX|GTX|Radeon", na=False, case=False)) &
-            (df['CPU'].str.contains("i5|i7|Ryzen 5|Ryzen 7|Ryzen 9|i9", na=False, case=False)) &
-            (df['Storage'] >= 512)
+            (df['Storage'] >= 512) &
+            (df['GPU'].str.contains(gpu_keywords, na=False, case=False)) &
+            (df['CPU'].str.contains("i5|i7|i9|Ryzen 5|Ryzen 7|Ryzen 9", na=False, case=False))
         ]
 
-    # 🎨 Kategori Desain Grafis
+        # Tambahkan skor (semakin tinggi semakin bagus)
+        def skor(row):
+            base = 0
+            if "RTX 40" in str(row["GPU"]): base += 5
+            elif "RTX 30" in str(row["GPU"]): base += 4
+            elif "GTX" in str(row["GPU"]): base += 3
+            elif "Radeon" in str(row["GPU"]): base += 2
+            base += row["RAM"] / 8
+            base += row["Storage"] / 512
+            return base
+
+        df["skor"] = df.apply(skor, axis=1)
+
     elif label == 'desain':
         df = df[
-            (df['RAM'] >= 16) &  # Desain butuh RAM tinggi
+            (df['RAM'] >= 16) &
             (df['Storage'] >= 512) &
-            (df['CPU'].str.contains("i7|i9|Ryzen 7|Ryzen 9", na=False, case=False)) &
-            (df['GPU'].str.contains("RTX|GTX|Radeon|MX", na=False, case=False))  # Bisa MX series juga
+            (df['GPU'].str.contains(gpu_keywords, na=False, case=False)) &
+            (df['CPU'].str.contains("i7|i9|Ryzen 7|Ryzen 9", na=False, case=False))
         ]
+        df["skor"] = df["RAM"] / 8 + df["Storage"] / 512
 
-    # 🧑‍💼 Kategori Kantor/Produktivitas
     elif label == 'kantor':
         df = df[
             (df['RAM'] >= 8) &
-            (df['Storage'] >= 256) &
-            (df['CPU'].str.contains("i3|i5|Ryzen 3|Ryzen 5|Pentium|Celeron", na=False, case=False)) &
-            (df['GPU'].isna() | df['GPU'].str.contains("integrated|intel|amd", na=False, case=False))
+            (df['Storage'] >= 256)
         ]
+        df["skor"] = df["RAM"] / 4 + df["Storage"] / 256
 
-    # 🧍 Kategori Umum
-    else:  # 'umum'
+    else:  # umum
         df = df[
             (df['RAM'] >= 4) &
-            (df['Storage'] >= 128) &
-            (df['CPU'].str.contains("i3|Pentium|Celeron|Ryzen 3", na=False, case=False))
+            (df['Storage'] >= 128)
         ]
+        df["skor"] = df["RAM"] / 4 + df["Storage"] / 128
 
-    # 💰 Filter berdasarkan budget
+    # 💰 Budget
     budget = ekstrak_budget(teks_user)
     if budget:
         df = df[df['Final Price'] <= budget]
 
-    hasil = df.sort_values(by="Final Price").head(top_n)
-    return label, hasil.reset_index(drop=True)
+    # 🔼 Urutkan berdasarkan skor (bukan harga)
+    hasil = df.sort_values(by="skor", ascending=False).head(top_n)
+    return label, hasil.drop(columns="skor").reset_index(drop=True)
 
 # === Flask App ===
 app = Flask(__name__)
