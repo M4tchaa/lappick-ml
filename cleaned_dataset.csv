@@ -144,7 +144,7 @@ New,MSI,Pulse,Intel Core i9,32,1000,SSD,RTX 4070,15.6,0,37933500.0
 New,MSI,Stealth,Intel Core i7,32,1000,SSD,RTX 4060,15.6,0,31333500.0
 New,Asus,Chromebook,Intel Celeron,8,64,eMMC,Integrated,14.0,1,7408500.0
 New,Lenovo,V15,Intel Core i5,16,512,SSD,Integrated,15.6,0,11533500.0
-New,Asus,Chromebook,Intel Celeron,8,32,Unknown,Integrated,14.0,0,5758500.0
+New,Asus,Chromebook,Intel Celeron,8,32,eMMC,Integrated,14.0,0,5758500.0
 New,MSI,Vector,Intel Core i9,32,1000,SSD,RTX 4080,16.0,0,42883500.0
 New,HP,15S,Intel Core i5,8,512,SSD,Integrated,15.6,0,9553665.0
 New,Acer,Aspire,Intel Core i5,8,512,SSD,Integrated,15.6,0,12358500.0
@@ -188,7 +188,7 @@ New,HP,Omen,Intel Core i7,32,1000,SSD,RTX 4060,17.3,0,29683500.0
 New,Medion,Akoya,Intel Core i5,8,512,SSD,Integrated,16.1,0,8233500.0
 New,Lenovo,V15,AMD Ryzen 3,8,256,SSD,Integrated,15.6,0,6583500.0
 New,Asus,ZenBook,AMD Ryzen 7,16,512,SSD,Integrated,14.0,0,18958500.0
-Refurbished,Alurin,Flex Advance,Intel Core i5,8,0,Unknown,Integrated,14.0,0,6083550.0
+Refurbished,Alurin,Flex Advance,Intel Core i5,8,0,SSD,Integrated,14.0,0,6083550.0
 New,Acer,Aspire,Intel Core i3,8,512,SSD,Integrated,15.6,0,8233500.0
 New,Asus,Chromebook,Intel Core i3,8,256,SSD,Integrated,15.6,1,11533500.0
 New,MSI,Stealth,Intel Core i7,32,1000,SSD,RTX 4070,17.3,0,48658500.0
@@ -259,7 +259,7 @@ New,MSI,Pulse,Intel Core i7,16,1000,SSD,RTX 4060,17.3,0,31333500.0
 New,HP,255,AMD Ryzen 3,8,512,SSD,Integrated,15.6,0,6402000.0
 New,Lenovo,V15,Intel Core i5,8,256,SSD,Integrated,15.6,0,8233500.0
 New,Lenovo,IdeaPad,AMD Ryzen 5,8,512,SSD,RTX 3050,15.6,0,15589530.0
-New,Asus,ROG,Intel Core i7,32,1000,Unknown,RTX 4080,16.0,0,42883665.0
+New,Asus,ROG,Intel Core i7,32,1000,SSD,RTX 4080,16.0,0,42883665.0
 New,Asus,VivoBook,Intel Core i7,16,512,SSD,Integrated,15.6,0,14998500.0
 New,MSI,Summit,Intel Evo Core i7,16,1000,SSD,Integrated,13.4,1,29683500.0
 New,Asus,E410,Intel Celeron,4,64,eMMC,Integrated,14.0,0,7458000.0
@@ -476,7 +476,7 @@ New,Asus,TUF,Intel Core i7,32,1000,SSD,RTX 3070,15.6,0,31168500.0
 New,MSI,Stealth,Intel Core i7,16,1000,SSD,RTX 4060,16.0,0,37108500.0
 New,HP,Victus,Intel Core i5,16,512,SSD,RTX 3050,15.6,0,17324835.0
 New,Asus,ROG,Intel Core i9,32,1000,SSD,RTX 4080,16.0,0,51133500.0
-New,Prixton,Flex,Intel Celeron,4,64,Unknown,Integrated,11.6,1,5444175.0
+New,Prixton,Flex,Intel Celeron,4,64,eMMC,Integrated,11.6,1,5444175.0
 New,MSI,Titan,Intel Core i9,128,2000,SSD,RTX 4090,17.3,0,98983500.0
 New,Alurin,Go,Intel Pentium,8,128,SSD,Integrated,14.1,0,6352500.0
 New,LG,Gram,Intel Evo Core i7,16,512,SSD,Integrated,17.0,0,29683500.0
@@ -492,7 +492,7 @@ New,Asus,VivoBook,Intel Core i5,16,512,SSD,Integrated,15.6,0,10163505.0
 New,Gigabyte,Aero,Intel Core i7,16,1000,SSD,RTX 4050,14.0,0,32488665.0
 New,MSI,Creator,Intel Core i7,32,1000,SSD,RTX 4070,16.0,1,48658500.0
 New,MSI,Stealth,Intel Core i7,16,1000,SSD,RTX 4060,14.0,0,38758665.0
-Refurbished,Apple,MacBook Pro,Intel Core i5,8,256,Unknown,Integrated,13.0,0,10465125.0
+Refurbished,Apple,MacBook Pro,Intel Core i5,8,256,SSD,Integrated,13.0,0,10465125.0
 New,Asus,ZenBook,Intel Core i7,32,1000,SSD,RTX 3060,15.6,1,46183500.0
 New,Asus,ROG,AMD Ryzen 9,64,2000,SSD,RTX 4090,16.0,0,85123500.0
 New,Gigabyte,Aero,Intel Core i7,16,2000,SSD,RTX 3070,17.3,0,49483500.0
@@ -568,7 +568,7 @@ New,Medion,Akoya,AMD Ryzen 3,8,256,SSD,Integrated,15.6,0,8728500.0
 New,Microsoft,Surface Laptop,AMD Ryzen 7,8,256,SSD,Integrated,15.0,1,23908500.0
 New,Razer,Blade,Intel Core i9,16,1000,SSD,RTX 4060,16.0,0,51133500.0
 New,Razer,Blade,Intel Core i9,16,1000,SSD,RTX 4070,16.0,0,57733665.0
-New,Alurin,Alurin,AMD Radeon 5,8,256,Unknown,Integrated,15.6,0,8233500.0
+New,Alurin,Alurin,AMD Radeon 5,8,256,SSD,Integrated,15.6,0,8233500.0
 New,Alurin,Flex Advance,AMD Ryzen 5,8,500,SSD,Integrated,15.6,0,9223500.0
 New,Razer,Blade,Intel Core i9,32,1000,SSD,RTX 4070,16.0,0,62699835.0
 New,Asus,ZenBook,Intel Evo Core i7,16,512,SSD,Integrated,14.0,0,20773665.0
@@ -580,7 +580,7 @@ New,HP,15S,Intel Core i5,8,256,SSD,Integrated,15.6,0,7496445.0
 New,HP,15S,Intel Core i5,8,512,SSD,Integrated,15.6,0,8164365.0
 New,Alurin,Flex Advance,AMD Ryzen 5,8,256,SSD,Integrated,15.6,0,6583500.0
 New,Asus,TUF,Intel Core i5,16,512,SSD,GTX 1650,15.6,0,11863665.0
-New,Alurin,Alurin,Intel Core i7,8,500,Unknown,Integrated,15.6,0,14338500.0
+New,Alurin,Alurin,Intel Core i7,8,500,SSD,Integrated,15.6,0,14338500.0
 New,HP,250,Intel Core i7,16,512,SSD,Integrated,15.6,0,13596000.0
 New,Apple,MacBook Pro,Apple M2 Pro,32,1000,SSD,Integrated,16.2,0,57733665.0
 New,Lenovo,V15,Intel Core i3,8,256,SSD,Integrated,15.6,0,8183835.0
@@ -599,7 +599,7 @@ New,Lenovo,Legion,Intel Core i9,32,1000,SSD,RTX 4070,16.0,0,44368665.0
 New,Acer,ConceptD,Intel Core i7,16,512,SSD,GTX 1650,16.0,0,29683500.0
 New,Lenovo,V15,Intel Core i5,8,512,SSD,Integrated,15.6,0,9568350.0
 New,Acer,Predator,Intel Core i7,16,1000,SSD,RTX 3060,17.3,0,29683500.0
-New,Asus,F515,Intel Core i3,8,256,Unknown,Integrated,15.6,0,6732000.0
+New,Asus,F515,Intel Core i3,8,256,SSD,Integrated,15.6,0,6732000.0
 New,Acer,Chromebook,Intel Core i7,16,256,SSD,Integrated,16.0,0,18793665.0
 New,Acer,Nitro,AMD Ryzen 9,16,1000,SSD,RTX 3080,15.6,0,39583665.0
 New,Dell,Latitude,Intel Core i5,8,256,SSD,Integrated,15.0,0,26383500.0
@@ -653,7 +653,7 @@ New,Acer,Aspire,Intel Core i3,8,256,SSD,Integrated,15.6,0,6355800.0
 New,Acer,TravelMate,Intel Core i5,8,256,SSD,Integrated,15.6,0,11962500.0
 New,Acer,Extensa,Intel Core i5,8,512,SSD,Integrated,15.6,0,9718500.0
 New,Asus,ExpertBook,Intel Core i7,16,512,SSD,Integrated,15.6,0,14602335.0
-New,HP,Chromebook,Intel Celeron,4,32,Unknown,Integrated,11.6,1,4662405.0
+New,HP,Chromebook,Intel Celeron,4,32,eMMC,Integrated,11.6,1,4662405.0
 New,LG,Gram,Intel Evo Core i7,32,1000,SSD,Integrated,14.0,0,32983500.0
 New,Acer,Extensa,Intel Core i3,8,256,SSD,Integrated,15.6,0,7111335.0
 New,LG,Gram,Intel Evo Core i7,32,512,SSD,RTX 3050,16.0,0,38758500.0
@@ -727,10 +727,10 @@ New,Microsoft,Surface Pro,Intel Core i5,8,256,SSD,Integrated,12.3,1,18862140.0
 New,Apple,MacBook Pro,Apple M2 Pro,32,1000,SSD,Integrated,14.2,0,54103500.0
 New,Asus,VivoBook,Intel Core i5,8,512,SSD,Integrated,15.6,0,8283000.0
 New,HP,15S,Intel Core i3,8,256,SSD,Integrated,15.6,0,6878355.0
-New,HP,Chromebook,Intel Celeron,4,32,Unknown,Integrated,11.6,0,3797310.0
+New,HP,Chromebook,Intel Celeron,4,32,eMMC,Integrated,11.6,0,3797310.0
 New,Acer,Extensa,AMD Ryzen 5,8,512,SSD,Integrated,15.6,0,6253665.0
 New,Microsoft,Surface Laptop,Intel Core i7,16,512,SSD,RTX 3050,14.4,1,36283665.0
-New,Alurin,Flex Advance,Intel Core i5,8,256,Unknown,Integrated,15.6,0,9058500.0
+New,Alurin,Flex Advance,Intel Core i5,8,256,SSD,Integrated,15.6,0,9058500.0
 New,Medion,Beast,Intel Core i7,32,1000,SSD,RTX 3070,17.3,0,42883500.0
 New,Acer,Aspire,Intel Core i7,8,512,SSD,Integrated,15.6,0,20608665.0
 New,MSI,Modern,Intel Core i5,8,512,SSD,Integrated,14.0,0,13183500.0
@@ -746,7 +746,7 @@ New,HP,250,Intel Core i5,16,512,SSD,Integrated,15.6,0,14528745.0
 New,Acer,Extensa,Intel Core i5,16,512,SSD,Integrated,15.6,0,11066055.0
 New,HP,14S,AMD Athlon,8,512,SSD,Integrated,14.0,0,6996000.0
 New,PcCom,Revolt,Intel Core i5,16,500,SSD,RTX 3050,15.6,0,21943350.0
-New,PcCom,Revolt,Intel Core i7,16,500,Unknown,RTX 3050,15.6,0,24418350.0
+New,PcCom,Revolt,Intel Core i7,16,500,SSD,RTX 3050,15.6,0,24418350.0
 New,PcCom,Revolt,Intel Core i5,16,500,SSD,RTX 4050,15.6,0,22273350.0
 New,PcCom,Revolt,Intel Core i5,16,500,SSD,RTX 4050,15.6,0,24418350.0
 New,PcCom,Revolt,Intel Core i5,16,500,SSD,RTX 4060,15.6,0,27718350.0
@@ -786,7 +786,7 @@ New,MSI,Pulse,Intel Core i7,16,1000,SSD,RTX 4070,17.3,0,38001150.0
 New,Microsoft,Surface Laptop,AMD Ryzen 7,8,512,SSD,Integrated,15.0,1,27208500.0
 New,Microsoft,Surface Laptop,Intel Evo Core i7,8,512,SSD,Integrated,15.0,1,28858500.0
 New,Microsoft,Surface Laptop,Intel Core i7,32,2000,SSD,RTX 3050,14.4,1,52783500.0
-New,PcCom,Revolt,Intel Core i7,16,500,Unknown,RTX 3050,15.6,0,22273350.0
+New,PcCom,Revolt,Intel Core i7,16,500,SSD,RTX 3050,15.6,0,22273350.0
 New,Acer,Predator,Intel Core i7,32,1000,SSD,RTX 3080,16.0,0,45193500.0
 New,HP,Zbook,Intel Core i7,16,512,SSD,Integrated,16.0,0,26845500.0
 New,Lenovo,ThinkPad,Intel Core i7,16,512,SSD,Integrated,14.0,0,24997500.0
@@ -842,7 +842,7 @@ New,Medion,Akoya,Intel Core i5,8,256,SSD,Integrated,15.6,0,12003585.0
 New,Dell,Vostro,Intel Core i7,16,512,SSD,Integrated,14.0,0,17556000.0
 Refurbished,LG,Gram,Intel Core i7,16,1000,SSD,Integrated,16.0,1,32983500.0
 New,Microsoft,Surface Pro,Intel Evo Core i5,8,256,SSD,Integrated,13.0,1,23149500.0
-Refurbished,Apple,MacBook Pro,Intel Core i5,8,128,Unknown,Integrated,13.0,0,9966000.0
+Refurbished,Apple,MacBook Pro,Intel Core i5,8,128,SSD,Integrated,13.0,0,9966000.0
 New,Asus,VivoBook,Intel Core i5,12,512,SSD,Integrated,16.0,0,13728165.0
 Refurbished,Gigabyte,Aorus,Intel Core i7,16,1000,SSD,RTX 3060,15.6,0,26383500.0
 New,Asus,ExpertBook,Intel Core i5,16,512,SSD,Integrated,15.6,0,13200000.0
@@ -874,7 +874,7 @@ New,HP,15S,AMD Ryzen 7,12,512,SSD,Integrated,15.6,0,10117800.0
 New,Asus,VivoBook,Intel Core i7,8,512,SSD,Integrated,16.0,0,9899835.0
 New,HP,Victus,AMD Ryzen 7,8,512,SSD,Radeon Pro 5500M,16.1,0,14259795.0
 Refurbished,MSI,Modern,Intel Core i7,16,1000,SSD,Integrated,15.6,0,19783500.0
-New,Microsoft,Surface Pro,Intel Core i5,8,256,Unknown,Integrated,12.3,0,22258500.0
+New,Microsoft,Surface Pro,Intel Core i5,8,256,SSD,Integrated,12.3,0,22258500.0
 New,HP,15S,Intel Core i7,16,512,SSD,Integrated,15.6,0,11475750.0
 New,MSI,Stealth,Intel Core i7,32,1000,SSD,RTX 4070,14.0,0,44533500.0
 New,Asus,M515,AMD Ryzen 5,12,512,SSD,Integrated,15.6,0,11673915.0
@@ -926,11 +926,11 @@ New,Lenovo,Yoga,Intel Evo Core i7,16,512,SSD,Integrated,14.5,0,25756500.0
 New,Acer,ConceptD,Intel Core i7,32,1000,SSD,RTX 3080,15.6,1,60901500.0
 Refurbished,HP,ProBook,Intel Core i5,8,256,SSD,Integrated,15.6,0,11219175.0
 New,HP,Zbook,Intel Core i7,32,512,SSD,RTX A1000,16.0,0,47291640.0
-Refurbished,Apple,MacBook Air,Intel Core i5,4,128,Unknown,Integrated,13.3,0,4933500.0
+Refurbished,Apple,MacBook Air,Intel Core i5,4,128,SSD,Integrated,13.3,0,4933500.0
 Refurbished,Lenovo,ThinkPad,Intel Core i7,16,512,SSD,Integrated,15.6,0,16069185.0
 New,Microsoft,Surface Pro,Intel Evo Core i5,16,256,SSD,Integrated,13.0,1,29337000.0
 New,Samsung,Galaxy Book,Intel Evo Core i5,16,512,SSD,Integrated,13.3,1,25756500.0
-Refurbished,Apple,MacBook Air,Intel Core i5,8,128,Unknown,Integrated,13.3,0,5473875.0
+Refurbished,Apple,MacBook Air,Intel Core i5,8,128,SSD,Integrated,13.3,0,5473875.0
 New,Razer,Blade,Intel Core i9,32,1000,SSD,RTX 4080,16.0,0,69298515.0
 New,HP,15S,Intel Celeron,8,512,SSD,Integrated,15.6,0,6468000.0
 New,Samsung,Galaxy Book,Intel Core i7,16,512,SSD,Integrated,14.0,0,26383500.0
@@ -944,7 +944,7 @@ New,MSI,Pulse,Intel Core i7,32,1000,SSD,RTX 3060,15.6,0,36581655.0
 New,Dell,Vostro,Intel Core i7,16,512,SSD,Integrated,16.0,0,18026580.0
 New,Asus,F515,Intel Core i3,8,512,SSD,Integrated,15.6,0,9084900.0
 New,HP,15S,AMD Athlon,8,256,SSD,Integrated,15.6,0,6451830.0
-New,HP,15S,AMD Athlon,8,512,Unknown,Integrated,15.6,0,6699000.0
+New,HP,15S,AMD Athlon,8,512,SSD,Integrated,15.6,0,6699000.0
 New,HP,15S,AMD 3020e,4,128,SSD,Integrated,15.6,0,6299040.0
 New,HP,15S,Intel Core i5,8,256,SSD,Integrated,15.6,0,8164365.0
 New,HP,EliteBook,Intel Core i5,8,256,SSD,Integrated,14.0,0,12387045.0
@@ -1012,7 +1012,7 @@ New,Lenovo,Legion,Intel Core i7,16,512,SSD,RTX 3060,15.6,0,30195000.0
 New,Lenovo,ThinkPad,Intel Core i5,8,256,SSD,Integrated,14.0,0,16962000.0
 New,Lenovo,ThinkPad,Intel Core i7,16,512,SSD,T 600,15.6,0,37306335.0
 New,Lenovo,Yoga,AMD Ryzen 7,16,512,SSD,Integrated,14.0,1,23727000.0
-New,Prixton,Netbook Pro,Intel Celeron,4,128,Unknown,Integrated,15.6,0,4074675.0
+New,Prixton,Netbook Pro,Intel Celeron,4,128,SSD,Integrated,15.6,0,4074675.0
 Refurbished,Apple,MacBook Pro,Intel Core i5,8,256,SSD,Integrated,13.3,0,12526800.0
 New,Asus,ExpertBook,Intel Core i3,8,256,SSD,Integrated,14.0,0,8433645.0
 New,Asus,VivoBook,Intel Core i5,8,512,SSD,Integrated,16.0,0,8250000.0
@@ -1084,7 +1084,7 @@ New,HP,15S,Intel Core i5,8,512,SSD,Integrated,15.6,0,8748135.0
 New,HP,Victus,AMD Ryzen 5,8,512,SSD,GTX 1650,16.1,0,13950420.0
 New,MSI,Katana,Intel Core i7,16,1000,SSD,RTX 4060,17.3,0,31809360.0
 New,Asus,F415EA,Intel Core i3,8,256,SSD,Integrated,14.0,0,7781895.0
-New,Asus,VivoBook,Intel Core i5,8,512,Unknown,Integrated,15.6,0,8695500.0
+New,Asus,VivoBook,Intel Core i5,8,512,SSD,Integrated,15.6,0,8695500.0
 New,Dell,Latitude,Intel Core i5,8,256,SSD,Integrated,14.0,0,17034270.0
 New,Lenovo,IdeaPad,AMD Ryzen 5,16,512,SSD,Integrated,14.0,0,12358500.0
 New,Lenovo,V15,AMD Ryzen 5,8,512,SSD,Integrated,15.6,0,7243500.0
@@ -1103,7 +1103,7 @@ Refurbished,HP,EliteBook,Intel Core i5,8,256,SSD,Integrated,13.3,1,10230000.0
 New,Lenovo,LOQ,Intel Core i5,16,512,SSD,RTX 4060,15.6,0,24722445.0
 New,Acer,Chromebook,Intel Celeron,8,64,eMMC,Integrated,14.0,0,6171000.0
 Refurbished,Asus,TUF,Intel Core i5,16,512,SSD,RTX 3050,15.6,0,15658500.0
-Refurbished,Apple,Macbook,Intel Core M3,8,256,Unknown,Integrated,12.0,0,9134070.0
+Refurbished,Apple,Macbook,Intel Core M3,8,256,SSD,Integrated,12.0,0,9134070.0
 New,Dell,Latitude,Intel Core i5,8,256,SSD,Integrated,13.3,0,15048000.0
 New,Dell,Vostro,Intel Core i5,16,512,SSD,Integrated,16.0,0,15866400.0
 Refurbished,Asus,ZenBook,AMD Ryzen 7,16,512,SSD,Integrated,14.0,0,14008500.0
@@ -1130,8 +1130,8 @@ Refurbished,Acer,Nitro,Intel Core i7,16,512,SSD,RTX 3050,15.6,0,21433500.0
 Refurbished,Acer,Predator,Intel Core i7,16,1000,SSD,RTX 3060,17.3,0,24719310.0
 Refurbished,Acer,Predator,Intel Core i7,16,1000,SSD,RTX 3060,16.0,0,18250485.0
 Refurbished,Apple,MacBook Air,Intel Core i5,8,256,SSD,Integrated,13.3,0,12627945.0
-Refurbished,Apple,Macbook,Intel Core M3,8,256,Unknown,Integrated,12.0,0,9134070.0
-Refurbished,Apple,Macbook,Intel Core i5,8,512,Unknown,Integrated,12.0,0,11296725.0
+Refurbished,Apple,Macbook,Intel Core M3,8,256,SSD,Integrated,12.0,0,9134070.0
+Refurbished,Apple,Macbook,Intel Core i5,8,512,SSD,Integrated,12.0,0,11296725.0
 Refurbished,Apple,MacBook Pro,Apple M1 Pro,16,1000,SSD,Integrated,14.2,0,45358500.0
 Refurbished,Apple,MacBook Pro,Intel Core i5,8,256,SSD,Integrated,13.0,0,13459875.0
 Refurbished,Apple,MacBook Pro,Intel Core i7,16,256,SSD,Integrated,15.4,0,18451125.0
@@ -1144,8 +1144,8 @@ Refurbished,HP,EliteBook,Intel Core i5,16,512,SSD,Integrated,13.3,0,21931800.0
 Refurbished,HP,Omen,AMD Ryzen 7,16,512,SSD,Radeon RX 6600M,16.1,0,10466610.0
 Refurbished,HP,Omen,Intel Core i7,16,1000,SSD,RTX 3060,16.1,0,23886060.0
 Refurbished,HP,ProBook,Intel Core i7,16,512,SSD,Integrated,13.3,0,23446170.0
-Refurbished,HP,ProBook,Intel Core i5,4,500,Unknown,Integrated,14.0,0,6105165.0
-Refurbished,HP,Victus,AMD Ryzen 7,8,512,Unknown,RTX 3050,16.1,0,13681635.0
+Refurbished,HP,ProBook,Intel Core i5,4,500,HDD,Integrated,14.0,0,6105165.0
+Refurbished,HP,Victus,AMD Ryzen 7,8,512,SSD,RTX 3050,16.1,0,13681635.0
 Refurbished,LG,Gram,Intel Evo Core i7,32,2000,SSD,Integrated,16.0,0,31056135.0
 Refurbished,Lenovo,ThinkPad,Intel Core i5,8,256,SSD,Integrated,14.0,0,22100925.0
 Refurbished,MSI,Creator,Intel Core i7,32,1000,SSD,RTX A5500,17.0,1,74233500.0
@@ -1166,14 +1166,14 @@ Refurbished,Asus,ExpertBook,Intel Core i5,16,512,SSD,Integrated,15.6,0,12028500.
 Refurbished,Asus,F415EA,Intel Core i5,8,512,SSD,Integrated,14.0,0,9553500.0
 Refurbished,Asus,ROG,AMD Ryzen 7,16,1000,SSD,Integrated,14.0,0,36283500.0
 Refurbished,Asus,ROG,AMD Ryzen 7,16,1000,SSD,RTX 3060,15.6,0,36283500.0
-Refurbished,Asus,VivoBook,Intel Pentium,4,128,Unknown,Integrated,13.3,1,9258150.0
+Refurbished,Asus,VivoBook,Intel Pentium,4,128,eMMC,Integrated,13.3,1,9258150.0
 Refurbished,Asus,VivoBook,Intel Core i7,16,512,SSD,Integrated,15.6,0,14833500.0
 Refurbished,Acer,Aspire,Intel Core i5,8,512,SSD,Integrated,15.6,0,7880400.0
 New,Acer,Chromebook,Intel Celeron,8,64,eMMC,Integrated,14.0,0,5725335.0
 Refurbished,Acer,Chromebook,Intel Celeron,8,64,eMMC,Integrated,14.0,0,5923500.0
 Refurbished,Acer,Predator,Intel Core i7,16,1000,SSD,RTX 3080,15.6,0,32983500.0
-Refurbished,Apple,MacBook Pro,Intel Core i5,8,128,Unknown,Integrated,13.0,0,9966000.0
-Refurbished,Apple,MacBook Pro,Intel Core i7,16,512,Unknown,Integrated,15.0,0,16287975.0
+Refurbished,Apple,MacBook Pro,Intel Core i5,8,128,SSD,Integrated,13.0,0,9966000.0
+Refurbished,Apple,MacBook Pro,Intel Core i7,16,512,SSD,Integrated,15.0,0,16287975.0
 Refurbished,Asus,Chromebook,Intel Celeron,8,64,eMMC,Integrated,15.6,0,6583500.0
 Refurbished,Asus,ZenBook,Intel Core i7,16,512,SSD,Integrated,14.0,0,14008500.0
 Refurbished,Dell,Latitude,Intel Core i5,8,256,SSD,Integrated,15.6,0,18574875.0
@@ -1208,7 +1208,7 @@ New,HP,15S,AMD Ryzen 5,12,256,SSD,Integrated,15.6,0,10813110.0
 New,HP,Omen,Intel Core i7,16,1000,SSD,RTX 3060,16.1,0,31141935.0
 New,HP,Victus,Intel Core i5,8,512,SSD,RTX 3050,16.1,0,23738220.0
 New,HP,250,Intel Core i7,16,512,SSD,Integrated,15.6,0,17787000.0
-New,Asus,Chromebook,Intel Celeron,4,32,Unknown,Integrated,11.6,0,5029530.0
+New,Asus,Chromebook,Intel Celeron,4,32,eMMC,Integrated,11.6,0,5029530.0
 New,Asus,Chromebook,Intel Celeron,4,32,eMMC,Integrated,11.6,1,6573600.0
 New,Asus,Chromebook,Intel Celeron,8,32,eMMC,Integrated,15.6,0,7689000.0
 New,Asus,Chromebook,Intel Core i5,8,256,SSD,Integrated,14.0,0,12820500.0
@@ -1451,7 +1451,7 @@ New,HP,Pavilion,AMD Ryzen 5,16,512,SSD,Integrated,15.6,0,13467465.0
 New,HP,Pavilion,Intel Core i5,8,512,SSD,Integrated,14.0,1,16285500.0
 New,HP,Pavilion,Intel Core i3,8,256,SSD,Integrated,14.0,1,13084500.0
 New,HP,Pavilion,Intel Core i7,16,512,SSD,Integrated,14.0,1,19882500.0
-New,HP,ProBook,Intel Core i5,4,500,Unknown,Integrated,13.3,0,15177195.0
+New,HP,ProBook,Intel Core i5,4,500,SSD,Integrated,13.3,0,15177195.0
 New,HP,ProBook,Intel Core i5,8,256,SSD,Integrated,15.6,0,23087460.0
 New,HP,ProBook,Intel Core i5,8,256,SSD,Integrated,15.6,0,12809280.0
 New,HP,Victus,Intel Core i5,16,512,SSD,RTX 3050,15.6,0,14833665.0
@@ -1570,10 +1570,10 @@ New,Lenovo,ThinkPad,AMD Ryzen 7,16,512,SSD,Integrated,16.0,0,37636500.0
 New,Lenovo,ThinkPad,Intel Core i7,16,512,SSD,Integrated,15.6,0,32990100.0
 New,Lenovo,ThinkPad,Intel Evo Core i7,32,1000,SSD,Integrated,14.0,0,61397820.0
 New,Lenovo,V14,AMD Ryzen 3,8,256,SSD,Integrated,14.0,0,12489675.0
-Refurbished,Lenovo,V14,Intel Core i5,8,256,Unknown,Integrated,14.0,0,6534495.0
+Refurbished,Lenovo,V14,Intel Core i5,8,256,SSD,Integrated,14.0,0,6534495.0
 New,Lenovo,V14,Intel Core i3,8,512,SSD,Integrated,14.0,0,8478855.0
 New,Lenovo,V15,AMD Ryzen 7,8,512,SSD,Integrated,15.6,0,9316230.0
-New,Lenovo,V15,Intel Core i3,8,256,Unknown,Integrated,15.6,0,10906500.0
+New,Lenovo,V15,Intel Core i3,8,256,SSD,Integrated,15.6,0,10906500.0
 New,Lenovo,V15,Intel Core i7,8,512,SSD,Integrated,15.6,0,10919205.0
 New,Lenovo,V15,Intel Core i5,8,512,SSD,Integrated,15.6,0,8359065.0
 New,Lenovo,V15,AMD Ryzen 5,8,256,SSD,Integrated,15.6,0,11847000.0
@@ -1586,7 +1586,7 @@ New,Lenovo,V15,Intel Core i3,8,512,SSD,Integrated,15.6,0,9514890.0
 New,Lenovo,Yoga,AMD Ryzen 5,8,512,SSD,Integrated,14.0,1,21631500.0
 New,Lenovo,Yoga,Intel Evo Core i7,16,1000,SSD,Integrated,14.0,1,39333525.0
 New,Lenovo,Yoga,Intel Evo Core i7,16,1000,SSD,Integrated,14.0,1,43659000.0
-New,Lenovo,Yoga,Intel Core i5,8,128,Unknown,Integrated,15.6,1,19274145.0
+New,Lenovo,Yoga,Intel Core i5,8,128,eMMC,Integrated,15.6,1,19274145.0
 New,Lenovo,Yoga,Intel Core i7,16,1000,SSD,Integrated,14.0,0,34232220.0
 New,Lenovo,Yoga,Intel Evo Core i7,16,512,SSD,Integrated,14.0,0,26817120.0
 New,Lenovo,Yoga,Intel Evo Core i7,8,512,SSD,Integrated,14.0,0,20971500.0
@@ -1611,7 +1611,7 @@ New,Medion,Akoya,AMD Ryzen 3,8,256,SSD,Integrated,15.6,0,6102525.0
 New,Medion,Akoya,AMD Ryzen 5,8,256,SSD,Integrated,15.6,0,6599835.0
 New,Medion,Akoya,AMD Ryzen 5,8,256,SSD,Integrated,15.6,0,10954350.0
 New,Medion,Akoya,Intel Celeron,4,64,eMMC,Integrated,13.3,0,7769190.0
-New,Medion,Akoya,Intel Celeron,4,128,Unknown,Integrated,14.0,0,4413585.0
+New,Medion,Akoya,Intel Celeron,4,128,SSD,Integrated,14.0,0,4413585.0
 New,Medion,Akoya,Intel Celeron,8,256,SSD,Integrated,15.6,0,6735960.0
 New,Medion,Akoya,Intel Core i5,8,512,SSD,Integrated,15.6,0,9872115.0
 New,Medion,Akoya,Intel Core i5,8,512,SSD,Integrated,15.6,0,11069025.0
@@ -1642,8 +1642,8 @@ New,Microsoft,Surface Laptop,Intel Core i5,8,128,SSD,Integrated,12.4,1,13596000.
 New,Microsoft,Surface Laptop,Intel Core i5,4,64,eMMC,Integrated,12.4,1,11333520.0
 New,Microsoft,Surface Laptop,Intel Core i5,8,256,SSD,Integrated,12.4,1,18714465.0
 New,Microsoft,Surface Laptop,Intel Core i7,16,512,SSD,RTX 3050,14.4,1,37365075.0
-New,Microsoft,Surface Pro,Intel Core i7,16,256,Unknown,Integrated,12.3,0,27208500.0
-New,Microsoft,Surface Pro,Intel Core i7,16,512,Unknown,Integrated,12.3,0,34633500.0
+New,Microsoft,Surface Pro,Intel Core i7,16,256,SSD,Integrated,12.3,0,27208500.0
+New,Microsoft,Surface Pro,Intel Core i7,16,512,SSD,Integrated,12.3,0,34633500.0
 Refurbished,Microsoft,Surface Pro,Intel Core i5,8,128,SSD,Integrated,12.3,1,16664835.0
 New,Microsoft,Surface Pro,Intel Evo Core i7,16,1000,SSD,Integrated,12.3,1,46901250.0
 New,Microsoft,Surface Pro,Intel Core i5,16,512,SSD,Integrated,13.0,1,31630335.0
@@ -1660,8 +1660,8 @@ New,Primux,Ioxbook,Intel Core i5,8,512,SSD,Integrated,15.6,0,7234590.0
 New,Primux,Ioxbook,Intel Core i3,8,256,SSD,Integrated,15.6,0,5713620.0
 New,Razer,Blade,Intel Core i7,16,1000,SSD,RTX 3060,17.3,0,51149670.0
 New,Realme,Book Prime,Intel Core i5,8,512,SSD,Integrated,14.0,0,16483500.0
-New,Samsung,Chromebook,Intel Celeron,4,64,Unknown,Integrated,12.4,1,8229045.0
-New,Thomson,Go,Qualcomm Snapdragon 8,8,256,Unknown,Integrated,13.0,0,7203240.0
+New,Samsung,Chromebook,Intel Celeron,4,64,eMMC,Integrated,12.4,1,8229045.0
+New,Thomson,Go,Qualcomm Snapdragon 8,8,256,SSD,Integrated,13.0,0,7203240.0
 New,Toshiba,Tecra,Intel Core i3,8,256,SSD,Integrated,14.0,0,13183500.0
 New,Vant,Edge,Intel Core i7,16,500,SSD,Integrated,14.0,0,18529500.0
 New,Vant,Edge,Intel Core i7,16,1000,SSD,Integrated,14.0,0,19173000.0
@@ -1741,8 +1741,8 @@ Refurbished,Apple,MacBook Air,Intel Core i5,8,128,SSD,Integrated,13.3,0,10861125
 Refurbished,Apple,MacBook Air,Intel Core i5,8,256,SSD,Integrated,13.3,0,18118320.0
 Refurbished,Apple,MacBook Air,Intel Core i5,8,256,SSD,Integrated,13.3,0,12457500.0
 Refurbished,Apple,MacBook Air,Intel Core i5,8,512,SSD,Integrated,13.3,0,16830165.0
-Refurbished,Apple,MacBook Air,Intel Core i5,4,256,Unknown,Integrated,13.3,0,5346000.0
-Refurbished,Apple,Macbook,Intel Core M3,8,256,Unknown,Integrated,12.0,0,10132320.0
+Refurbished,Apple,MacBook Air,Intel Core i5,4,256,SSD,Integrated,13.3,0,5346000.0
+Refurbished,Apple,Macbook,Intel Core M3,8,256,SSD,Integrated,12.0,0,10132320.0
 Refurbished,Apple,MacBook Pro,Apple M1 Pro,16,1000,SSD,Integrated,14.2,0,41250165.0
 Refurbished,Apple,MacBook Pro,Apple M1 Pro,16,1000,SSD,Integrated,16.2,0,49153500.0
 Refurbished,Apple,MacBook Pro,Apple M1 Pro,16,1000,SSD,Integrated,16.2,0,48675000.0
@@ -1895,7 +1895,7 @@ Refurbished,HP,EliteBook,Intel Core i5,8,256,SSD,Integrated,15.6,0,17721990.0
 Refurbished,HP,EliteBook,Intel Core i7,16,512,SSD,Integrated,15.6,0,31172625.0
 Refurbished,HP,EliteBook,Intel Core i5,8,256,SSD,Integrated,13.3,1,14289000.0
 Refurbished,HP,255,AMD Ryzen 5,8,512,SSD,Integrated,15.6,0,9883500.0
-Refurbished,HP,Omen,Intel Core i7,8,1000,Unknown,GTX 1050,15.6,0,12947385.0
+Refurbished,HP,Omen,Intel Core i7,8,1000,HDD,GTX 1050,15.6,0,12947385.0
 Refurbished,HP,Omen,AMD Ryzen 7,16,1000,SSD,RTX 2060,15.6,0,14246760.0
 Refurbished,HP,Omen,AMD Ryzen 9,16,1000,SSD,RTX 3070,16.1,0,20499435.0
 Refurbished,HP,Omen,Intel Core i7,16,1000,SSD,RTX 3060,16.1,0,24733500.0
@@ -2132,7 +2132,7 @@ Refurbished,MSI,Vector,Intel Core i7,32,1000,SSD,RTX 3070,15.6,0,41233500.0
 Refurbished,MSI,Vector,Intel Core i7,16,1000,SSD,RTX 3070,17.3,0,37933500.0
 Refurbished,MSI,Vector,Intel Core i9,32,1000,SSD,RTX 3070,17.3,0,42883500.0
 Refurbished,MSI,Vector,Intel Core i7,32,1000,SSD,RTX 3080,17.3,0,47833500.0
-Refurbished,Medion,Akoya,Intel Celeron,4,64,Unknown,Integrated,14.0,0,4073685.0
+Refurbished,Medion,Akoya,Intel Celeron,4,64,eMMC,Integrated,14.0,0,4073685.0
 Refurbished,Microsoft,Surface Pro,Intel Core i7,16,512,SSD,Integrated,12.3,0,14833665.0
 Refurbished,Microsoft,Surface Pro,Intel Core i7,16,1000,SSD,Integrated,12.3,0,29317035.0
 Refurbished,Microsoft,Surface Pro,Intel Core i7,16,256,SSD,Integrated,12.3,0,18051495.0
