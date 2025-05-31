@@ -1,0 +1,63 @@
+App,Category,CPU,GPU,RAM
+Adobe Premiere Pro,Video,Intel Core i7-13700 / AMD Ryzen 7 7700X,NVIDIA RTX 4070 / AMD RX 7800 XT,64GB
+Adobe Photoshop,Design,Intel Core i5-13600K / AMD Ryzen 5 7600X,NVIDIA RTX 4060 Ti / AMD RX 7700 XT,32GB
+DaVinci Resolve,Video,Intel Core i9-13900 / AMD Ryzen 9 7900X,NVIDIA RTX 4080 / AMD RX 7900 XT,64GB
+Blender,3D,Intel Core i7-13700 / AMD Ryzen 7 7700X,NVIDIA RTX 4070 / AMD RX 7800 XT,64GB
+Autodesk Maya,3D,Intel Core i9-13900 / AMD Ryzen 9 7900X,NVIDIA RTX 4080 / AMD RX 7900 XT,64GB
+CorelDRAW,Design,Intel Core i5-13600K / AMD Ryzen 5 7600X,NVIDIA RTX 3060 / AMD RX 6700 XT,32GB
+VEGAS Pro,Video,Intel Core i7-13700H / AMD Ryzen 7 7840HS,NVIDIA RTX 4060 Laptop / AMD RX 7700S,32GB
+Affinity Photo,Design,Intel Core i5-13600K / AMD Ryzen 5 7600X,NVIDIA RTX 4060 / AMD RX 7600,32GB
+Final Cut Pro,Video,Apple M2 Pro,Apple M2 Pro GPU,32GB
+Lightroom Classic,Design,Intel Core i7-13700 / AMD Ryzen 7 7700X,NVIDIA RTX 4070 / AMD RX 7800 XT,32GB
+Cinema 4D,3D,Intel Core i9-13900 / AMD Ryzen 9 7900X,NVIDIA RTX 4080 / AMD RX 7900 XT,64GB
+Avid Media Composer,Video,Intel Core i7-13700HX / AMD Ryzen 9 7940HS,NVIDIA RTX 4070 Laptop / AMD RX 7700S,64GB
+HitFilm Express,Video,Intel Core i7-13700H / AMD Ryzen 7 7840HS,NVIDIA RTX 4060 Laptop / AMD RX 7700S,32GB
+Capture One,Design,Intel Core i7-13700 / AMD Ryzen 7 7700X,NVIDIA RTX 4070 / AMD RX 7800 XT,32GB
+Krita,Design,Intel Core i5-13500H / AMD Ryzen 7 7735HS,NVIDIA RTX 4060 Laptop / AMD RX 7600S,32GB
+SketchUp,Design,Intel Core i7-13700 / AMD Ryzen 7 7700X,NVIDIA RTX 4070 / AMD RX 7800 XT,32GB
+PaintTool SAI,Design,Intel Core i5-13600K / AMD Ryzen 5 7600X,NVIDIA RTX 3060 / AMD RX 7600,32GB
+Adobe Illustrator,Design,Intel Core i7-13700 / AMD Ryzen 7 7700X,NVIDIA RTX 4070 / AMD RX 7800 XT,32GB
+ZBrush,3D,Intel Core i9-13900 / AMD Ryzen 9 7900X,NVIDIA RTX 4070 / AMD RX 7800 XT,64GB
+OpenToonz,Design,Intel Core i5-13600K / AMD Ryzen 5 7600X,NVIDIA RTX 4060 Ti / AMD RX 7700 XT,32GB
+Adobe After Effects,Video,Intel Core i9-13900 / AMD Ryzen 9 7900X,NVIDIA RTX 4080 / AMD RX 7900 XT,64GB
+Adobe Lightroom,Design,Intel Core i7-13700 / AMD Ryzen 7 7700X,NVIDIA RTX 4070 / AMD RX 7800 XT,32GB
+Adobe InDesign,Design,Intel Core i5-13600K / AMD Ryzen 5 7600X,NVIDIA RTX 4060 Ti / AMD RX 7700 XT,32GB
+Adobe XD,UI/UX,Intel Core i5-13500H / AMD Ryzen 5 7640HS,Intel Iris Xe / AMD Radeon 780M,32GB
+Adobe Animate,Animation,Intel Core i7-13700H / AMD Ryzen 7 7840HS,NVIDIA RTX 4060 Laptop / AMD RX 7700S,32GB
+Adobe Dreamweaver,Web,Intel Core i5-13500H / AMD Ryzen 5 7640HS,Intel Iris Xe / AMD Radeon 780M,32GB
+Adobe Substance 3D Painter,3D,Intel Core i9-13900 / AMD Ryzen 9 7900X,NVIDIA RTX 4080 / AMD RX 7900 XT,64GB
+Adobe Substance 3D Designer,3D,Intel Core i9-13900 / AMD Ryzen 9 7950X,NVIDIA RTX 4090 / AMD RX 7900 XTX,96GB
+Adobe Substance 3D Sampler,3D,Intel Core i7-13700 / AMD Ryzen 7 7700X,NVIDIA RTX 4070 Ti / AMD RX 7900 XT,64GB
+Affinity Designer,Design,Intel Core i7-13700 / AMD Ryzen 7 7700X,NVIDIA RTX 4070 / AMD RX 7800 XT,32GB
+Affinity Publisher,Design,Intel Core i5-13600K / AMD Ryzen 5 7600X,NVIDIA RTX 4060 Ti / AMD RX 7700 XT,32GB
+Lightworks,Video,Intel Core i7-13700HX / AMD Ryzen 7 7840HS,NVIDIA RTX 4070 Laptop / AMD RX 7700S,64GB
+Clip Studio Paint,Design,Intel Core i5-13500H / AMD Ryzen 5 7640HS,NVIDIA RTX 4050 Laptop / AMD RX 7600S,32GB
+GIMP,Design,Intel Core i5-13600K / AMD Ryzen 5 7600X,NVIDIA RTX 3060 / AMD RX 6700 XT,32GB
+Inkscape,Design,Intel Core i5-13600K / AMD Ryzen 5 7600X,NVIDIA RTX 3060 / AMD RX 6700 XT,32GB
+Figma,UI/UX,Intel Core i5-13500H / AMD Ryzen 5 7640HS,Intel Iris Xe / AMD Radeon 780M,32GB
+Procreate,Design,Apple M2 chip (iPad),Apple M2 GPU,8GB
+3ds Max,3D,Intel Core i9-13900 / AMD Ryzen 9 7900X,NVIDIA RTX 4080 / AMD RX 7900 XT,64GB
+Houdini,3D,Intel Core i9-13900 / AMD Ryzen 9 7900X,NVIDIA RTX 4080 / AMD RX 7900 XT,64GB
+Unity,Game Dev,Intel Core i7-13700 / AMD Ryzen 7 7700X,NVIDIA RTX 4070 / AMD RX 7800 XT,64GB
+Unreal Engine,Game Dev,Intel Core i9-13900 / AMD Ryzen 9 7900X,NVIDIA RTX 4080 / AMD RX 7900 XT,64GB
+Toon Boom Harmony,Animation,Intel Core i7-13700 / AMD Ryzen 7 7700X,NVIDIA RTX 4070 / AMD RX 7800 XT,64GB
+Marvelous Designer,3D,Intel Core i9-13900 / AMD Ryzen 9 7900X,NVIDIA RTX 4080 / AMD RX 7900 XT,64GB
+KeyShot,Rendering,Intel Core i9-13900 / AMD Ryzen 9 7900X,NVIDIA RTX 4080 / AMD RX 7900 XT,64GB
+Nuke,VFX,Intel Core i9-13900 / AMD Ryzen 9 7900X,NVIDIA RTX 4080 / AMD RX 7900 XT,96GB
+Arnold Renderer,Rendering,Intel Core i9-13900 / AMD Ryzen 9 7900X,NVIDIA RTX 4080 / AMD RX 7900 XT,96GB
+Redshift,Rendering,Intel Core i9-13900 / AMD Ryzen 9 7900X,NVIDIA RTX 4090 / AMD RX 7900 XTX,96GB
+Audacity,Audio,Intel Core i5-13600K / AMD Ryzen 5 7600X,Intel UHD 770 / AMD Radeon 780M,32GB
+OBS Studio,Broadcast,Intel Core i7-13700 / AMD Ryzen 7 7700X,NVIDIA RTX 4070 / AMD RX 7800 XT,32GB
+REAPER,Audio,Intel Core i7-13700 / AMD Ryzen 7 7700X,Intel UHD 770 / AMD Radeon 780M,64GB
+Resolume Arena,Live Visuals,Intel Core i9-13900 / AMD Ryzen 9 7900X,NVIDIA RTX 4080 / AMD RX 7900 XT,64GB
+TouchDesigner,Live Visuals,Intel Core i9-13900 / AMD Ryzen 9 7900X,NVIDIA RTX 4090 / AMD RX 7900 XTX,64GB
+Ableton Live,Audio,Intel Core i7-13700 / AMD Ryzen 7 7700X,Intel UHD 770 / AMD Radeon 780M,64GB
+Pro Tools,Audio,Intel Core i9-13900 / AMD Ryzen 9 7900X,Intel UHD 770 / AMD Radeon 780M,64GB
+FL Studio,Audio,Intel Core i7-13700 / AMD Ryzen 7 7700X,Intel UHD 770 / AMD Radeon 780M,32GB
+Max/MSP,Audio,Intel Core i7-13700 / AMD Ryzen 7 7700X,Intel UHD 770 / AMD Radeon 780M,32GB
+V-Ray,Rendering,Intel Core i9-13900 / AMD Ryzen 9 7900X,NVIDIA RTX 4080 / AMD RX 7900 XT,96GB
+Octane Render,Rendering,Intel Core i9-13900 / AMD Ryzen 9 7900X,NVIDIA RTX 4090 / AMD RX 7900 XTX,96GB
+Quixel Mixer,3D,Intel Core i7-13700 / AMD Ryzen 7 7700X,NVIDIA RTX 4070 / AMD RX 7800 XT,64GB
+Mari,3D,Intel Core i9-13900 / AMD Ryzen 9 7900X,NVIDIA RTX 4090 / AMD RX 7900 XTX,96GB
+Blackmagic Fusion,VFX,Intel Core i7-13700 / AMD Ryzen 7 7700X,NVIDIA RTX 4070 Ti / AMD RX 7900 XT,64GB
+Adobe Audition,Audio,Intel Core i7-13700 / AMD Ryzen 7 7700X,Intel UHD 770 / AMD Radeon 780M,64GB
