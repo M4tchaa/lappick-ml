@@ -29,10 +29,11 @@
 
         if (data.rekomendasi && data.rekomendasi.length > 0) {
           let html = `<p><strong>Kategori:</strong> ${data.label_prediksi}</p>`;
-          html += `<table class="table table-striped"><thead><tr><th>Brand</th><th>Model</th><th>CPU</th><th>RAM</th><th>GPU</th><th>Harga</th></tr></thead><tbody>`;
+          html += `<table class="table table-striped"><thead><tr><th>Laptop</th><th>Brand</th><th>Model</th><th>CPU</th><th>RAM</th><th>GPU</th><th>Harga</th></tr></thead><tbody>`;
 
           data.rekomendasi.forEach(laptop => {
             html += `<tr>
+              <td>${laptop.Laptop || '-'}</td>
               <td>${laptop.Brand}</td>
               <td>${laptop.Model}</td>
               <td>${laptop.CPU}</td>
