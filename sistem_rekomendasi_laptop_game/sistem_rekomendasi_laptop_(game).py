@@ -572,7 +572,7 @@ def extract_entities_and_budget(user_query, game_list, laptop_list, laptop_brand
     query_tokens_cleaned = remove_stopwords(query_tokens)
 
     # Ekstrak budget
-    budget_pattern = r'(?:harga|rp|rp\.|budget)\s*:?\s*(\d+(?:\.\d+)?)\s*(rb|ribu|jt|juta)?|\b(\d+)\s*(rb|ribu|jt|juta)\b'
+    budget_pattern = r'(?:harga|rp|rp\.|budget)\s*:?\s*(\d+(?:[,\.]\d+)?)\s*(rb|ribu|jt|juta)?|\b(\d+(?:[,\.]\d+)?)\s*(rb|ribu|jt|juta)\b'
     budget_match = re.search(budget_pattern, query_lower)
     budget_tokens = set()
 
@@ -587,14 +587,18 @@ def extract_entities_and_budget(user_query, game_list, laptop_list, laptop_brand
 
         if amount_str:
             try:
-                amount = float(amount_str.replace('.', ''))
+                # Replace comma with dot for float conversion
+                amount = float(amount_str.replace(',', '.'))
                 if unit in ['juta', 'jt']:
                     extracted_budget = int(amount * 1_000_000)
                 elif unit in ['ribu', 'rb']:
                     extracted_budget = int(amount * 1_000)
                 else:
                     extracted_budget = int(amount)
-                budget_tokens.add(amount_str)
+                # Add both original and normalized amount string to budget_tokens
+                budget_tokens.add(amount_str.replace(',', '.'))
+                budget_tokens.add(amount_str.replace('.', ','))
+
             except ValueError:
                 extracted_budget = None
 
@@ -602,7 +606,7 @@ def extract_entities_and_budget(user_query, game_list, laptop_list, laptop_brand
     game_matching_tokens = [t for t in query_tokens_cleaned if t not in budget_tokens]
     cleaned_query_string_for_game = " ".join(game_matching_tokens)
 
-    # Angka yang ada di query untuk game
+    # Angka yang ada di query untuk game (pastikan tidak termasuk angka budget)
     query_numbers = set(t for t in game_matching_tokens if t.isdigit())
 
     # 1. High threshold fuzzy matching dengan token_set_ratio
@@ -668,7 +672,7 @@ def extract_entities_and_budget(user_query, game_list, laptop_list, laptop_brand
         for game in found_games:
             game_numbers = set(re.findall(r'\d+', game))
             if game_numbers:
-                if not (game_numbers & query_numbers):
+                if not (query_numbers & game_numbers):
                     continue
             filtered_games.append(game)
         found_games = filtered_games
@@ -684,6 +688,7 @@ def extract_entities_and_budget(user_query, game_list, laptop_list, laptop_brand
     # Prioritas 2: Fuzzy matching (only if no exact matches found for laptops)
     if not found_laptops:
         for entity in laptop_entities:
+            # Use the cleaned query string for game matching, excluding budget tokens
             match = process.extractOne(
                 entity,
                 [cleaned_query_string_for_game],
@@ -692,6 +697,7 @@ def extract_entities_and_budget(user_query, game_list, laptop_list, laptop_brand
             )
             if match:
                 found_laptops.add(entity)
+
 
     return list(found_games), list(found_laptops), extracted_budget
 
@@ -718,10 +724,11 @@ queries = [
     "Laptop yang cocok buat main genshin impact dan assassin creed black flag dengan laptop ASUS dengan harga 20 juta?",
     "Laptop yang cocok buat main genshin impact dan Assassin's Creed Syndicate dengan harga 20 juta?",
     "Laptop yang cocok buat main genshin dan doom dengan harga 20 juta?",
-    "Laptop yang cocok buat main genshin dan fifa dengan harga 40 juta?",
-    "Laptop yang cocok buat main genshin dan the sims 4 harga 20 juta?",
+    "Laptop yang cocok buat main genshin dan fifa dengan harga 20 juta?",
+    "Laptop yang cocok buat main genshin dan fifa 22 dengan harga 30 juta?",
     "Laptop yang cocok buat main genshin dan gta san andreas dengan harga 20 juta?",
-    "Laptop yang cocok buat main genshin impact dan the sims 4 dengan harga 22 juta?"
+    "Laptop yang cocok buat main genshin impact dan the sims 4 dengan harga 22 juta?",
+    "Laptop yang cocok buat main the sims 4 dengan budget 22,5 juta?"
 ]
 
 for query in queries:
@@ -1061,7 +1068,7 @@ def get_laptop_recommendations(user_query, laptop_df, min_req_df, rec_req_df,
         display(final_recommendations)
         return final_recommendations
 
-query1 = "Laptop yang cocok buat main game valorant dengan ROG harga 105 juta"
+query1 = "Laptop yang cocok buat main game valorant dengan ROG harga 105,5 juta"
 recommendations1 = get_laptop_recommendations(
     query1, laptop_df, min_req_df, rec_req_df,
     min_req_kb, rec_req_kb,
