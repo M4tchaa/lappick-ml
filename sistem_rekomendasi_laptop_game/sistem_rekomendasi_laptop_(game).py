@@ -698,7 +698,6 @@ def extract_entities_and_budget(user_query, game_list, laptop_list, laptop_brand
             if match:
                 found_laptops.add(entity)
 
-
     return list(found_games), list(found_laptops), extracted_budget
 
 # === Pipeline Function ===
@@ -721,14 +720,7 @@ def nlp_pipeline_fuzzy(user_query, game_list, laptop_list, laptop_brand_list,
 
 # Test cases
 queries = [
-    "Laptop yang cocok buat main genshin impact dan assassin creed black flag dengan laptop ASUS dengan harga 20 juta?",
-    "Laptop yang cocok buat main genshin impact dan Assassin's Creed Syndicate dengan harga 20 juta?",
-    "Laptop yang cocok buat main genshin dan doom dengan harga 20 juta?",
-    "Laptop yang cocok buat main genshin dan fifa dengan harga 20 juta?",
-    "Laptop yang cocok buat main genshin dan fifa 22 dengan harga 30 juta?",
-    "Laptop yang cocok buat main genshin dan gta san andreas dengan harga 20 juta?",
-    "Laptop yang cocok buat main genshin impact dan the sims 4 dengan harga 22 juta?",
-    "Laptop yang cocok buat main the sims 4 dengan budget 22,5 juta?"
+    "Laptop yang cocok buat main eFootball PES 2021 dengan laptop ASUS dengan harga 40 juta?"
 ]
 
 for query in queries:
@@ -741,8 +733,6 @@ for query in queries:
         game_series_map
     )
     print(f"\nQuery: {query}\nResult: {result}")
-
-"""# Fungsi Utama"""
 
 from sentence_transformers import SentenceTransformer
 import pandas as pd
@@ -812,12 +802,72 @@ print("Hasil pencarian:", query)
 for res in results:
     print(res)
 
-import pandas as pd
-import torch
-from fuzzywuzzy import process
+def recognize_intent_simple(query, found_games, found_laptops, budget):
+    query_lower = query.lower()
+    query_tokens = set(basic_preprocessing(query_lower))
+
+    intent = "FIND_LAPTOP_FOR_GAME"
+
+    # Check for specific keywords indicating intent
+    if "terbaik" in query_tokens or "tertinggi" in query_tokens or "high performance" in query_lower:
+        # Prioritize recommended specs or highest match score
+        intent = "FIND_BEST_LAPTOP_FOR_GAME"
+    elif "termurah" in query_tokens or "paling murah" in query_lower or "low budget" in query_lower:
+        # Prioritize minimum specs or lowest price within category
+        intent = "FIND_CHEAPEST_LAPTOP_FOR_GAME"
+    elif "bandingkan" in query_tokens or "compare" in query_tokens:
+        # Needs at least two laptop entities to be meaningful
+        if len(found_laptops) >= 2:
+            intent = "COMPARE_LAPTOPS"
+        else:
+            # If compare keyword is present but not enough laptops, fallback or ask for clarification
+            intent = "UNKNOWN"
+    elif (found_laptops or budget is not None) and not found_games:
+         intent = "FILTER_LAPTOPS"
+
+    # If game is detected and no other strong intent, it's likely about finding a laptop for that game
+    if found_games and intent in ["FIND_LAPTOP_FOR_GAME", "FILTER_LAPTOPS"]:
+        intent = "FIND_LAPTOP_FOR_GAME"
+
+    # If nothing clear is found and no game/laptop detected
+    if not found_games and not found_laptops and budget is None:
+        intent = "GENERAL_QUERY"
+
+    return intent
+
+# Example Usage
+queries_for_intent = [
+    "Laptop terbaik buat main valorant",
+    "Laptop paling murah buat main the sims 4 dengan budget 15 juta",
+    "Bandingkan laptop ASUS ROG dan MSI Katana",
+    "Laptop ASUS harga 20 juta",
+    "Rekomendasi laptop gaming",
+    "Cari laptop ROG dengan budget 30 juta buat main Cyberpunk 2077",
+    "Bandingkan ROG",
+    "Laptop untuk kerja dan editing video"
+]
+
+for query in queries_for_intent:
+    # Simulate entity/budget extraction first
+    pipeline_result = nlp_pipeline_fuzzy(
+        query,
+        min_req_df['Game'].tolist(),
+        laptop_df['Model'].tolist(),
+        laptop_df['Brand'].unique().tolist(),
+        unique_keyword_game_map,
+        game_series_map
+    )
+    found_games = pipeline_result['found_games']
+    found_laptops = pipeline_result['found_laptops']
+    budget = pipeline_result['budget']
+
+    detected_intent = recognize_intent_simple(query, found_games, found_laptops, budget)
+    print(f"Query: '{query}'\nDetected Intent: {detected_intent}\n")
+
+"""# Fungsi Utama"""
 
 # --- Fungsi Rekomendasi Utama ---
-def get_laptop_recommendations(user_query, laptop_df, min_req_df, rec_req_df,
+def get_laptop_recommendations_with_intent(user_query, laptop_df, min_req_df, rec_req_df,
                                min_req_kb, rec_req_kb,
                                model, description_embeddings,
                                laptop_list, laptop_brand_list, unique_keyword_game_map, game_series_map,
@@ -827,253 +877,345 @@ def get_laptop_recommendations(user_query, laptop_df, min_req_df, rec_req_df,
 
     print(f"Query Pengguna: {user_query}")
 
-    # 1. Jalankan NLP Pipeline
+    # 1. Jalankan NLP Pipeline & Kenali Intent
     pipeline_result = nlp_pipeline_fuzzy(user_query, min_req_df['Game'].tolist(), laptop_df['Model'].tolist(), laptop_df['Brand'].unique().tolist(), unique_keyword_game_map, game_series_map)
     found_games = pipeline_result['found_games']
     found_laptops_entities = pipeline_result['found_laptops']
     extracted_budget = pipeline_result['budget']
 
-    print(f"Hasil NLP Pipeline: Game Terdeteksi={found_games}, Laptop Terdeteksi={found_laptops_entities}, Budget Terdeteksi={extracted_budget}")
+    detected_intent = recognize_intent_simple(user_query, found_games, found_laptops_entities, extracted_budget)
 
-    # 2. Tambahkan logika pengecekan game terdeteksi
-    game_targets = []
-    if not found_games:
-        print("Tidak ada game spesifik terdeteksi dari query.")
-        # Lakukan Semantic Search jika tidak ada game spesifik yang terdeteksi
-        print("Melakukan Semantic Search untuk game berdasarkan query...")
-        semantic_results = search_games(user_query, model, description_embeddings, min_req_df, top_n=top_n_semantic_games, category_boost=category_boost_value)
-        game_targets = [res['game'] for res in semantic_results if res['similarity'] > 0.6]
-        if game_targets:
-             print(f"Menemukan game relevan dari Semantic Search: {game_targets}")
+    print(f"Hasil NLP Pipeline: Game={found_games}, Laptop/Entity={found_laptops_entities}, Budget={extracted_budget}")
+    print(f"Intent Terdeteksi: {detected_intent}")
+
+    # --- Logika berdasarkan Intent ---
+    if detected_intent == "COMPARE_LAPTOPS":
+        if len(found_laptops_entities) < 2:
+             return pd.DataFrame({"Status": ["Informasi Kurang"], "Pesan": ["Mohon sebutkan minimal dua nama laptop atau brand untuk dibandingkan."]})
+
+        # Implement comparison logic here (e.g., show specs side-by-side)
+        print("\nIntent: Compare Laptops. Implementasi perbandingan spesifikasi laptop...")
+        # Filter laptop_df to show specs for the detected laptop entities
+        comparison_laptops = laptop_df[
+            laptop_df['Model'].str.lower().isin([ent.lower() for ent in found_laptops_entities if ent in laptop_df['Model'].tolist()]) |
+            laptop_df['Brand'].str.lower().isin([ent.lower() for ent in found_laptops_entities if ent in laptop_df['Brand'].unique().tolist()])
+        ].copy()
+        if comparison_laptops.empty:
+             return pd.DataFrame({"Status": ["Tidak Ditemukan"], "Pesan": ["Tidak ada laptop yang cocok dengan yang ingin Anda bandingkan."]})
+
+        display(comparison_laptops[['Brand', 'Model', 'CPU', 'GPU', 'RAM', 'Storage', 'Storage type', 'Screen', 'Final Price']])
+        return comparison_laptops[['Brand', 'Model', 'CPU', 'GPU', 'RAM', 'Storage', 'Storage type', 'Screen', 'Final Price']]
+
+    elif detected_intent == "FILTER_LAPTOPS":
+         if not found_laptops_entities and extracted_budget is None:
+              return pd.DataFrame({"Status": ["Informasi Kurang"], "Pesan": ["Mohon sebutkan brand laptop, model, atau budget yang Anda inginkan."]})
+
+         print("\nIntent: Filter Laptops. Menerapkan filter berdasarkan kriteria yang terdeteksi...")
+         laptops_to_evaluate = laptop_df.copy()
+
+         # Filter Budget
+         if extracted_budget is not None and extracted_budget > 0:
+             print(f"  - Memfilter laptop dengan budget <= {extracted_budget}")
+             laptops_to_evaluate = laptops_to_evaluate[laptops_to_evaluate['Final Price'] <= extracted_budget].copy()
+             print(f"    Jumlah laptop setelah filter budget: {len(laptops_to_evaluate)}")
+
+
+         # Filter Brand atau Model Spesifik
+         if found_laptops_entities:
+             print(f"  - Memfilter laptop berdasarkan entitas: {found_laptops_entities}")
+             filter_mask = pd.Series([False] * len(laptops_to_evaluate), index=laptops_to_evaluate.index)
+             for entity in found_laptops_entities:
+                 if entity in laptop_brand_list:
+                     filter_mask |= (laptops_to_evaluate['Brand'].str.lower() == entity.lower())
+                 elif entity in laptop_list:
+                      filter_mask |= (laptops_to_evaluate['Model'].str.lower() == entity.lower())
+                 else:
+                     # Use fuzzy matching for entities not in the predefined lists
+                     brand_match = process.extractOne(entity, laptops_to_evaluate['Brand'].unique().tolist(), score_cutoff=90)
+                     model_match = process.extractOne(entity, laptops_to_evaluate['Model'].tolist(), score_cutoff=90)
+                     if brand_match and brand_match[1] >= 90:
+                          filter_mask |= (laptops_to_evaluate['Brand'].str.lower() == brand_match[0].lower())
+                     if model_match and model_match[1] >= 90:
+                          filter_mask |= (laptops_to_evaluate['Model'].str.lower() == model_match[0].lower())
+
+
+             laptops_to_evaluate = laptops_to_evaluate[filter_mask].copy()
+             print(f"    Jumlah laptop setelah filter entitas: {len(laptops_to_evaluate)}")
+
+         if laptops_to_evaluate.empty:
+             print("Tidak ada laptop yang cocok dengan kriteria filter.")
+             return pd.DataFrame({"Status": ["Tidak Ditemukan"], "Pesan": ["Tidak ada laptop yang cocok dengan kriteria filter Anda."]})
+
+         print("\nHasil Laptop yang Difilter:")
+         display(laptops_to_evaluate[['Brand', 'Model', 'CPU', 'GPU', 'RAM', 'Storage', 'Storage type', 'Final Price']])
+         return laptops_to_evaluate[['Brand', 'Model', 'CPU', 'GPU', 'RAM', 'Storage', 'Storage type', 'Final Price']]
+
+
+    elif detected_intent in ["FIND_BEST_LAPTOP_FOR_GAME", "FIND_CHEAPEST_LAPTOP_FOR_GAME", "FIND_LAPTOP_FOR_GAME"]:
+        # --- Logika yang sudah ada untuk rekomendasi laptop berdasarkan game ---
+        game_targets = []
+        if not found_games:
+            print("\nTidak ada game spesifik terdeteksi dari query. Melakukan Semantic Search...")
+            semantic_results = search_games(user_query, model, description_embeddings, min_req_df, top_n=top_n_semantic_games, category_boost=category_boost_value)
+            game_targets = [res['game'] for res in semantic_results if res['similarity'] > 0.6]
+            if game_targets:
+                 print(f"  - Menemukan game relevan dari Semantic Search: {game_targets}")
+            else:
+                 print("  - Semantic Search tidak menemukan game relevan.")
+                 return pd.DataFrame({"Status": ["Tidak Ditemukan"], "Pesan": ["Tidak dapat menemukan game relevan dari query Anda."]})
         else:
-             print("Semantic Search tidak menemukan game relevan.")
+             game_targets = found_games
+             print(f"\nMenggunakan game yang terdeteksi spesifik oleh NLP Pipeline: {game_targets}")
+
+        target_game_min_req = None
+        target_game_rec_req = None
+        target_game_name = None
+        max_requirement_score = -1
+
+        if game_targets:
+            print(f"Mengevaluasi persyaratan untuk game target: {game_targets}")
+            valid_game_targets = []
+            for game_name in game_targets:
+                min_req = min_req_kb.get(game_name)
+                rec_req = rec_req_kb.get(game_name)
+
+                if min_req and rec_req:
+                    valid_game_targets.append(game_name)
+                    current_requirement_score = (min_req.get('CPU_Intel_score', 0) + min_req.get('CPU_AMD_score', 0) +
+                                                 min_req.get('GPU_NVIDIA_score', 0) + min_req.get('GPU_AMD_score', 0) + min_req.get('GPU_Intel_score', 0))
+
+                    print(f"  - {game_name}: Requirement Score = {current_requirement_score}")
+
+                    if current_requirement_score > max_requirement_score:
+                        max_requirement_score = current_requirement_score
+                        target_game_name = game_name
+                        target_game_min_req = min_req
+                        target_game_rec_req = rec_req
+
+            if not target_game_name:
+                 print("Tidak dapat menemukan persyaratan yang valid untuk game target dari knowledge base.")
+                 return pd.DataFrame({"Status": ["Tidak Ditemukan"], "Pesan": ["Tidak dapat menemukan persyaratan yang valid untuk game target dari knowledge base."]})
+
+            game_targets = valid_game_targets
+
+            print(f"\nMemilih game dengan persyaratan tertinggi: {target_game_name}")
+            print(f"Persyaratan Min: CPU={target_game_min_req['CPU_Intel']}/{target_game_min_req['CPU_AMD']}, GPU={target_game_min_req['GPU_NVIDIA']}/{target_game_min_req['GPU_AMD']}/{target_game_min_req['GPU_Intel']}, RAM: {target_game_min_req['RAM']} GB, Storage: {target_game_min_req['File Size']} GB")
+            print(f"Persyaratan Rec: CPU={target_game_rec_req['CPU_Intel']}/{target_game_rec_req['CPU_AMD']}, GPU={target_game_rec_req['GPU_NVIDIA']}/{target_game_rec_req['GPU_AMD']}/{target_game_rec_req['GPU_Intel']}, RAM: {target_game_rec_req['RAM']} GB, Storage: {target_game_rec_req['File Size']} GB")
+
+
+        else:
+             print("Tidak ada game relevan yang ditemukan dari query setelah semua upaya.")
              return pd.DataFrame({"Status": ["Tidak Ditemukan"], "Pesan": ["Tidak dapat menemukan game relevan dari query Anda."]})
 
-    else:
-        game_targets = found_games
-        print(f"Menggunakan game yang terdeteksi spesifik oleh NLP Pipeline: {game_targets}")
 
-    # 3. Mengevaluasi Persyaratan
-    target_game_min_req = None
-    target_game_rec_req = None
-    target_game_name = None
-    max_requirement_score = -1
+        # Siapkan Daftar Laptop
+        laptops_to_evaluate = laptop_df.copy()
 
-    if game_targets:
-        print(f"Mengevaluasi persyaratan untuk game target: {game_targets}")
-        valid_game_targets = []
-        for game_name in game_targets:
-            min_req = min_req_kb.get(game_name)
-            rec_req = rec_req_kb.get(game_name)
-
-            if min_req and rec_req:
-                valid_game_targets.append(game_name)
-                # Calculate requirement score (using min requirements)
-                current_requirement_score = (min_req.get('CPU_Intel_score', 0) + min_req.get('CPU_AMD_score', 0) +
-                                             min_req.get('GPU_NVIDIA_score', 0) + min_req.get('GPU_AMD_score', 0) + min_req.get('GPU_Intel_score', 0)) # Sum all min scores
-
-                print(f"  - {game_name}: Requirement Score = {current_requirement_score}")
-
-                # Select the game with the highest requirement score as the target
-                if current_requirement_score > max_requirement_score:
-                    max_requirement_score = current_requirement_score
-                    target_game_name = game_name
-                    target_game_min_req = min_req
-                    target_game_rec_req = rec_req
-
-        if not target_game_name:
-             print("Tidak dapat menemukan persyaratan yang valid untuk game target dari knowledge base.")
-             return pd.DataFrame({"Status": ["Tidak Ditemukan"], "Pesan": ["Tidak dapat menemukan persyaratan yang valid untuk game target dari knowledge base."]})
-
-        game_targets = valid_game_targets
-
-        print(f"\nMemilih game dengan persyaratan tertinggi: {target_game_name}")
-        print(f"Persyaratan Min: {target_game_min_req['CPU_Intel']} / {target_game_min_req['GPU_NVIDIA']}, RAM: {target_game_min_req['RAM']}, Storage: {target_game_min_req['File Size']}")
-        print(f"Persyaratan Rec: {target_game_rec_req['CPU_Intel']} / {target_game_rec_req['GPU_NVIDIA']}, RAM: {target_game_rec_req['RAM']}, Storage: {target_game_rec_req['File Size']}")
-    else:
-         print("Tidak ada game relevan yang ditemukan dari query setelah semua upaya.")
-         return pd.DataFrame({"Status": ["Tidak Ditemukan"], "Pesan": ["Tidak dapat menemukan game relevan dari query Anda."]})
-
-    # 4. Siapkan Daftar Laptop
-    laptops_to_evaluate = laptop_df.copy()
-
-    # Filter Budget
-    if extracted_budget is not None and extracted_budget > 0:
-        print(f"Memfilter laptop dengan budget <= {extracted_budget}")
-        laptops_to_evaluate = laptops_to_evaluate[laptops_to_evaluate['Final Price'] <= extracted_budget].copy()
-        print(f"Jumlah laptop setelah filter budget: {len(laptops_to_evaluate)}")
-        if laptops_to_evaluate.empty:
-            print("Tidak ada laptop dalam budget yang terdeteksi.")
-            return pd.DataFrame({"Status": ["Tidak Ditemukan"], "Pesan": [f"Tidak ada laptop dalam budget {extracted_budget:,} yang tersedia."]})
-
-    # Filter Brand atau Model Spesifik
-    if found_laptops_entities:
-        print(f"Memfilter laptop berdasarkan entitas: {found_laptops_entities}")
-        filter_mask = pd.Series([False] * len(laptops_to_evaluate), index=laptops_to_evaluate.index)
-        for entity in found_laptops_entities:
-            if entity in laptop_brand_list:
-                filter_mask |= (laptops_to_evaluate['Brand'].str.lower() == entity.lower())
-            elif entity in laptop_list:
-                 filter_mask |= (laptops_to_evaluate['Model'].str.lower() == entity.lower())
-            else:
-                 brand_match = process.extractOne(entity, laptops_to_evaluate['Brand'].tolist(), score_cutoff=90)
-                 model_match = process.extractOne(entity, laptops_to_evaluate['Model'].tolist(), score_cutoff=90)
-                 if brand_match and brand_match[1] >= 90:
-                      filter_mask |= (laptops_to_evaluate['Brand'].str.lower() == brand_match[0].lower())
-                 if model_match and model_match[1] >= 90:
-                      filter_mask |= (laptops_to_evaluate['Model'].str.lower() == model_match[0].lower())
-
-        laptops_to_evaluate = laptops_to_evaluate[filter_mask].copy()
-        print(f"Jumlah laptop setelah filter entitas: {len(laptops_to_evaluate)}")
-
-        if laptops_to_evaluate.empty:
-            print(f"Tidak ada laptop yang cocok dengan entitas '{', '.join(found_laptops_entities)}' dalam budget yang terdeteksi.")
-            return pd.DataFrame({"Status": ["Tidak Ditemukan"], "Pesan": [f"Tidak ada laptop yang cocok dengan '{', '.join(found_laptops_entities)}' dalam kriteria Anda."]})
-
-    # 5. Kategorisasi Laptop (Menggunakan categorize_laptops)
-    def categorize_laptops_adapted(df_laptops_filtered, req_row_min, req_row_rec, ram_weight=1.0, storage_weight=1.0, storage_type_weight=0.5): # Added storage_type_weight
-        if df_laptops_filtered.empty:
-             return pd.DataFrame()
-
-        ram_req = req_row_min['RAM']
-        storage_req = req_row_min['File Size']
-
-        def get_gpu_vendor(gpu_name):
-            if pd.isna(gpu_name): return 'intel'
-            gpu_name = str(gpu_name).lower()
-            if any(x in gpu_name for x in ['rtx', 'gtx', 'mx']): return 'nvidia'
-            elif any(x in gpu_name for x in ['radeon', 'rx', 'vega', 'pro']): return 'amd'
-            elif any(x in gpu_name for x in ['integrated', 'iris', 'uhd', 'hd graphics']): return 'intel'
-            else: return 'intel'
-
-        def get_cpu_vendor(cpu_name):
-            if pd.isna(cpu_name): return 'intel'
-            cpu_name = str(cpu_name).lower()
-            if 'intel' in cpu_name or any(x in cpu_name for x in ['core', 'pentium', 'celeron', 'xeon', 'evo']): return 'intel'
-            elif 'amd' in cpu_name or any(x in cpu_name for x in ['ryzen', 'fx', 'athlon', 'phenom', 'opteron']): return 'amd'
-            else: return 'intel'
-
-        def get_cpu_req_score(row, req_row):
-            vendor = get_cpu_vendor(row['CPU'])
-            if vendor == 'intel': return req_row.get('CPU_Intel_score', 0)
-            elif vendor == 'amd': return req_row.get('CPU_AMD_score', 0)
-            else: return req_row.get('CPU_Intel_score', 0)
-
-        def get_gpu_req_score(row, req_row):
-            vendor = get_gpu_vendor(row['GPU'])
-            if vendor == 'nvidia': return req_row.get('GPU_NVIDIA_score', 0)
-            elif vendor == 'amd': return req_row.get('GPU_AMD_score', 0)
-            elif vendor == 'intel': return req_row.get('GPU_Intel_score', 0)
-            else: return req_row.get('GPU_Intel_score', 0)
-
-        # Assign a score based on storage type
-        def get_storage_type_score(storage_type):
-            if pd.isna(storage_type): return 0
-            storage_type_lower = storage_type.lower()
-            if 'ssd' in storage_type_lower: return 1.0
-            elif 'hdd' in storage_type_lower: return 0.5
-            elif 'emmc' in storage_type_lower: return 0.3
-            else: return 0.0
-
-        def calculate_match(row):
-            cpu_req = get_cpu_req_score(row, req_row_rec)
-            gpu_req = get_gpu_req_score(row, req_row_rec)
-
-            # Avoid division by zero and handle potential NaN/inf
-            cpu_score_ratio = row['CPU_score'] / cpu_req if cpu_req > 0 and not pd.isna(row['CPU_score']) else (1.0 if cpu_req == 0 else 0.0)
-            gpu_score_ratio = row['GPU_score'] / gpu_req if gpu_req > 0 and not pd.isna(row['GPU_score']) else (1.0 if gpu_req == 0 else 0.0)
-            ram_score_ratio = (row['RAM'] / ram_req) * ram_weight if ram_req > 0 and not pd.isna(row['RAM']) else (1.0 if ram_req == 0 else 0.0)
-            storage_score_ratio = (row['Storage'] / storage_req) * storage_weight if storage_req > 0 and not pd.isna(row['Storage']) else (1.0 if storage_req == 0 else 0.0)
-            storage_type_score = get_storage_type_score(row['Storage type']) * storage_type_weight # Include storage type score
-
-            # Cap the ratios to prevent extreme values from dominating
-            cpu_score_ratio = min(cpu_score_ratio, 5.0)
-            gpu_score_ratio = min(gpu_score_ratio, 5.0)
-            ram_score_ratio = min(ram_score_ratio, 5.0)
-            storage_score_ratio = min(storage_score_ratio, 5.0)
-
-            # Ensure ratios are not NaN or Inf
-            cpu_score_ratio = 0.0 if pd.isna(cpu_score_ratio) or cpu_score_ratio == float('inf') else cpu_score_ratio
-            gpu_score_ratio = 0.0 if pd.isna(gpu_score_ratio) or gpu_score_ratio == float('inf') else gpu_score_ratio
-            ram_score_ratio = 0.0 if pd.isna(ram_score_ratio) or ram_score_ratio == float('inf') else ram_score_ratio
-            storage_score_ratio = 0.0 if pd.isna(storage_score_ratio) or storage_score_ratio == float('inf') else storage_score_ratio
-            storage_type_score = 0.0 if pd.isna(storage_type_score) or storage_type_score == float('inf') else storage_type_score
+        # Filter Budget
+        if extracted_budget is not None and extracted_budget > 0:
+            print(f"\nMemfilter laptop dengan budget <= {extracted_budget:,}")
+            laptops_to_evaluate = laptops_to_evaluate[laptops_to_evaluate['Final Price'] <= extracted_budget].copy()
+            print(f"Jumlah laptop setelah filter budget: {len(laptops_to_evaluate)}")
+            if laptops_to_evaluate.empty:
+                print("Tidak ada laptop dalam budget yang terdeteksi.")
+                return pd.DataFrame({"Status": ["Tidak Ditemukan"], "Pesan": [f"Tidak ada laptop dalam budget {extracted_budget:,} yang tersedia."]})
 
 
-            final_score = (cpu_score_ratio + gpu_score_ratio + ram_score_ratio + storage_score_ratio + storage_type_score) / (2 + ram_weight + storage_weight + storage_type_weight) # Adjust denominator
-            return final_score
+        # Filter Brand atau Model Spesifik (if any mentioned alongside game)
+        if found_laptops_entities:
+            print(f"Memfilter laptop berdasarkan entitas: {found_laptops_entities}")
+            filter_mask = pd.Series([False] * len(laptops_to_evaluate), index=laptops_to_evaluate.index)
+            for entity in found_laptops_entities:
+                if entity in laptop_brand_list:
+                    filter_mask |= (laptops_to_evaluate['Brand'].str.lower() == entity.lower())
+                elif entity in laptop_list:
+                     filter_mask |= (laptops_to_evaluate['Model'].str.lower() == entity.lower())
+                else:
+                    # Use fuzzy matching for entities not in the predefined lists
+                    brand_match = process.extractOne(entity, laptops_to_evaluate['Brand'].unique().tolist(), score_cutoff=90)
+                    model_match = process.extractOne(entity, laptops_to_evaluate['Model'].tolist(), score_cutoff=90)
+                    if brand_match and brand_match[1] >= 90:
+                         filter_mask |= (laptops_to_evaluate['Brand'].str.lower() == brand_match[0].lower())
+                    if model_match and model_match[1] >= 90:
+                         filter_mask |= (laptops_to_evaluate['Model'].str.lower() == model_match[0].lower())
 
-        def categorize(row):
-            cpu_min = get_cpu_req_score(row, req_row_min)
-            gpu_min = get_gpu_req_score(row, req_row_min)
-            cpu_rec = get_cpu_req_score(row, req_row_rec)
-            gpu_rec = get_gpu_req_score(row, req_row_rec)
+            laptops_to_evaluate = laptops_to_evaluate[filter_mask].copy()
+            print(f"Jumlah laptop setelah filter entitas: {len(laptops_to_evaluate)}")
 
-            # Ensure scores are not NaN before comparison
-            row_cpu_score = row['CPU_score'] if not pd.isna(row['CPU_score']) else -1
-            row_gpu_score = row['GPU_score'] if not pd.isna(row['GPU_score']) else -1
-            row_ram = row['RAM'] if not pd.isna(row['RAM']) else -1
-            row_storage = row['Storage'] if not pd.isna(row['Storage']) else -1
+            if laptops_to_evaluate.empty:
+                print(f"Tidak ada laptop yang cocok dengan entitas '{', '.join(found_laptops_entities)}' dalam budget yang terdeteksi.")
+                return pd.DataFrame({"Status": ["Tidak Ditemukan"], "Pesan": [f"Tidak ada laptop yang cocok dengan '{', '.join(found_laptops_entities)}' dalam kriteria Anda."]})
 
-            # Handle cases where req_row_min or req_row_rec might be missing keys
-            cpu_min = req_row_min.get('CPU_Intel_score', 0)
-            gpu_min = req_row_min.get('GPU_NVIDIA_score', 0)
-            cpu_rec = req_row_rec.get('CPU_Intel_score', 0)
-            gpu_rec = req_row_rec.get('GPU_NVIDIA_score', 0)
 
-            if row_cpu_score < cpu_min or row_gpu_score < gpu_min or row_ram < ram_req or row_storage < storage_req:
-                 return 'Disqualified'
-
-            cpu_rec_flag = row_cpu_score >= cpu_rec
-            gpu_rec_flag = row_gpu_score >= gpu_rec
-
-            if cpu_rec_flag and gpu_rec_flag: return 'Recommended'
-            elif cpu_rec_flag or gpu_rec_flag: return 'Mixed'
-            else: return 'Minimum'
-
-        df_filtered_req = df_laptops_filtered[
-            (df_laptops_filtered['RAM'] >= ram_req) & (df_laptops_filtered['Storage'] >= storage_req)
-        ].copy()
-        print(f"Jumlah laptop setelah filter RAM/Storage minimum: {len(df_filtered_req)}")
-
-        if df_filtered_req.empty:
-             print("Tidak ada laptop yang memenuhi persyaratan RAM dan Storage minimum.")
-             return pd.DataFrame()
-
-        df_filtered_req['Match_Score'] = df_filtered_req.apply(calculate_match, axis=1)
-        df_filtered_req['Category'] = df_filtered_req.apply(categorize, axis=1)
-
-        df_final = df_filtered_req[df_filtered_req['Category'] != 'Disqualified'].copy()
-        df_final = df_final.sort_values(by='Match_Score', ascending=False).reset_index(drop=True)
-        return df_final[['Brand', 'Model', 'CPU', 'GPU', 'RAM', 'Storage', 'Storage type', 'Final Price', 'Category', 'Match_Score']] # Added Storage type
-
-    print("Mengkategorikan laptop...")
-    final_recommendations = categorize_laptops_adapted(
-        laptops_to_evaluate,
-        target_game_min_req,
-        target_game_rec_req
-    )
-
-    # 6. Tampilkan Hasil
-    if final_recommendations.empty:
-        print("\nTidak ada rekomendasi laptop yang ditemukan berdasarkan kriteria Anda.")
-        print("Tidak ada laptop yang memenuhi persyaratan minimum game yang relevan di antara laptop yang sudah difilter.")
-        return pd.DataFrame({"Status": ["Tidak Ditemukan"], "Pesan": ["Tidak ada rekomendasi laptop yang memenuhi persyaratan minimum game yang relevan dalam kriteria Anda."]})
-    else:
-        print("\nHasil Rekomendasi Laptop:")
-        final_recommendations['Category_Order'] = final_recommendations['Category'].apply(
-            lambda x: 0 if x == 'Recommended' else (1 if x == 'Mixed' else 2)
+        print("\nMengkategorikan laptop berdasarkan persyaratan game target...")
+        final_recommendations = categorize_laptops_adapted( # Use the adapted function
+            laptops_to_evaluate,
+            target_game_min_req,
+            target_game_rec_req
         )
-        final_recommendations = final_recommendations.sort_values(by=['Category_Order', 'Match_Score'], ascending=[True, False]).drop(columns='Category_Order')
-        display(final_recommendations)
-        return final_recommendations
 
-query1 = "Laptop yang cocok buat main game valorant dengan ROG harga 105,5 juta"
-recommendations1 = get_laptop_recommendations(
-    query1, laptop_df, min_req_df, rec_req_df,
+        if final_recommendations.empty:
+            print("\nTidak ada rekomendasi laptop yang ditemukan berdasarkan kriteria Anda.")
+            print("Tidak ada laptop yang memenuhi persyaratan minimum game yang relevan di antara laptop yang sudah difilter.")
+            return pd.DataFrame({"Status": ["Tidak Ditemukan"], "Pesan": ["Tidak ada rekomendasi laptop yang memenuhi persyaratan minimum game yang relevan dalam kriteria Anda."]})
+        else:
+            print("\nHasil Rekomendasi Laptop:")
+            # Add sorting based on intent (e.g., best -> sort by Match_Score DESC, cheapest -> sort by Final Price ASC within categories)
+            if detected_intent == "FIND_BEST_LAPTOP_FOR_GAME":
+                final_recommendations['Category_Order'] = final_recommendations['Category'].apply(
+                    lambda x: 0 if x == 'Recommended' else (1 if x == 'Mixed' else 2)
+                )
+                final_recommendations = final_recommendations.sort_values(by=['Category_Order', 'Match_Score'], ascending=[True, False]).drop(columns='Category_Order')
+                print("\nDiurutkan berdasarkan Match Score (Terbaik ke Terburuk) dalam setiap kategori.")
+            elif detected_intent == "FIND_CHEAPEST_LAPTOP_FOR_GAME":
+                 final_recommendations['Category_Order'] = final_recommendations['Category'].apply(
+                    lambda x: 0 if x == 'Recommended' else (1 if x == 'Mixed' else 2)
+                 )
+                 final_recommendations = final_recommendations.sort_values(by=['Category_Order', 'Final Price', 'Match_Score'], ascending=[True, True, False]).drop(columns='Category_Order') # Sort by price then match score
+                 print("\nDiurutkan berdasarkan Harga (Termurah ke Termahal) dalam setiap kategori.")
+            else: # Default FIND_LAPTOP_FOR_GAME
+                 final_recommendations['Category_Order'] = final_recommendations['Category'].apply(
+                    lambda x: 0 if x == 'Recommended' else (1 if x == 'Mixed' else 2)
+                 )
+                 final_recommendations = final_recommendations.sort_values(by=['Category_Order', 'Match_Score'], ascending=[True, False]).drop(columns='Category_Order')
+                 print("\nDiurutkan berdasarkan Match Score (Default).")
+
+            display(final_recommendations)
+            return final_recommendations
+
+    else:
+        print("\nIntent tidak dikenali atau tidak didukung saat ini.")
+        return pd.DataFrame({"Status": ["Intent Tidak Dikenali"], "Pesan": ["Mohon maaf, niat Anda belum dapat saya proses saat ini."]})
+
+
+# Define categorize_laptops_adapted outside the main function
+def categorize_laptops_adapted(df_laptops_filtered, req_row_min, req_row_rec, ram_weight=1.0, storage_weight=1.0, storage_type_weight=0.5): # Added storage_type_weight
+    if df_laptops_filtered.empty:
+         return pd.DataFrame()
+
+    ram_req = req_row_min['RAM']
+    storage_req = req_row_min['File Size']
+
+    def get_gpu_vendor(gpu_name):
+        if pd.isna(gpu_name): return 'intel'
+        gpu_name = str(gpu_name).lower()
+        if any(x in gpu_name for x in ['rtx', 'gtx', 'mx']): return 'nvidia'
+        elif any(x in gpu_name for x in ['radeon', 'rx', 'vega', 'pro']): return 'amd'
+        elif any(x in gpu_name for x in ['integrated', 'iris', 'uhd', 'hd graphics']): return 'intel'
+        else: return 'intel'
+
+    def get_cpu_vendor(cpu_name):
+        if pd.isna(cpu_name): return 'intel'
+        cpu_name = str(cpu_name).lower()
+        if 'intel' in cpu_name or any(x in cpu_name for x in ['core', 'pentium', 'celeron', 'xeon', 'evo']): return 'intel'
+        elif 'amd' in cpu_name or any(x in cpu_name for x in ['ryzen', 'fx', 'athlon', 'phenom', 'opteron']): return 'amd'
+        else: return 'intel'
+
+    def get_cpu_req_score(row, req_row):
+        vendor = get_cpu_vendor(row['CPU'])
+        if vendor == 'intel': return req_row.get('CPU_Intel_score', 0)
+        elif vendor == 'amd': return req_row.get('CPU_AMD_score', 0)
+        else: return req_row.get('CPU_Intel_score', 0)
+
+    def get_gpu_req_score(row, req_row):
+        vendor = get_gpu_vendor(row['GPU'])
+        if vendor == 'nvidia': return req_row.get('GPU_NVIDIA_score', 0)
+        elif vendor == 'amd': return req_row.get('GPU_AMD_score', 0)
+        elif vendor == 'intel': return req_row.get('GPU_Intel_score', 0)
+        else: return req_row.get('GPU_Intel_score', 0)
+
+    # Assign a score based on storage type
+    def get_storage_type_score(storage_type):
+        if pd.isna(storage_type): return 0
+        storage_type_lower = storage_type.lower()
+        if 'ssd' in storage_type_lower: return 1.0
+        elif 'hdd' in storage_type_lower: return 0.5
+        elif 'emmc' in storage_type_lower: return 0.3
+        else: return 0.0
+
+    def calculate_match(row):
+        cpu_req = get_cpu_req_score(row, req_row_rec)
+        gpu_req = get_gpu_req_score(row, req_row_rec)
+
+        # Avoid division by zero and handle potential NaN/inf
+        cpu_score_ratio = row['CPU_score'] / cpu_req if cpu_req > 0 and not pd.isna(row['CPU_score']) else (1.0 if cpu_req == 0 else 0.0)
+        gpu_score_ratio = row['GPU_score'] / gpu_req if gpu_req > 0 and not pd.isna(row['GPU_score']) else (1.0 if gpu_req == 0 else 0.0)
+        ram_score_ratio = (row['RAM'] / ram_req) * ram_weight if ram_req > 0 and not pd.isna(row['RAM']) else (1.0 if ram_req == 0 else 0.0)
+        storage_score_ratio = (row['Storage'] / storage_req) * storage_weight if storage_req > 0 and not pd.isna(row['Storage']) else (1.0 if storage_req == 0 else 0.0)
+        storage_type_score = get_storage_type_score(row['Storage type']) * storage_type_weight # Include storage type score
+
+        # Cap the ratios to prevent extreme values from dominating
+        cpu_score_ratio = min(cpu_score_ratio, 5.0)
+        gpu_score_ratio = min(gpu_score_ratio, 5.0)
+        ram_score_ratio = min(ram_score_ratio, 5.0)
+        storage_score_ratio = min(storage_score_ratio, 5.0)
+
+        # Ensure ratios are not NaN or Inf
+        cpu_score_ratio = 0.0 if pd.isna(cpu_score_ratio) or cpu_score_ratio == float('inf') else cpu_score_ratio
+        gpu_score_ratio = 0.0 if pd.isna(gpu_score_ratio) or gpu_score_ratio == float('inf') else gpu_score_ratio
+        ram_score_ratio = 0.0 if pd.isna(ram_score_ratio) or ram_score_ratio == float('inf') else ram_score_ratio
+        storage_score_ratio = 0.0 if pd.isna(storage_score_ratio) or storage_score_ratio == float('inf') else storage_score_ratio
+        storage_type_score = 0.0 if pd.isna(storage_type_score) or storage_type_score == float('inf') else storage_type_score
+
+
+        final_score = (cpu_score_ratio + gpu_score_ratio + ram_score_ratio + storage_score_ratio + storage_type_score) / (2 + ram_weight + storage_weight + storage_type_weight) # Adjust denominator
+        return final_score
+
+    def categorize(row):
+        cpu_min = get_cpu_req_score(row, req_row_min)
+        gpu_min = get_gpu_req_score(row, req_row_min)
+        cpu_rec = get_cpu_req_score(row, req_row_rec)
+        gpu_rec = get_gpu_req_score(row, req_row_rec)
+
+        # Ensure scores are not NaN before comparison
+        row_cpu_score = row['CPU_score'] if not pd.isna(row['CPU_score']) else -1
+        row_gpu_score = row['GPU_score'] if not pd.isna(row['GPU_score']) else -1
+        row_ram = row['RAM'] if not pd.isna(row['RAM']) else -1
+        row_storage = row['Storage'] if not pd.isna(row['Storage']) else -1
+
+        # Handle cases where req_row_min or req_row_rec might be missing keys
+        cpu_min = req_row_min.get('CPU_Intel_score', 0)
+        gpu_min = req_row_min.get('GPU_NVIDIA_score', 0)
+        cpu_rec = req_row_rec.get('CPU_Intel_score', 0)
+        gpu_rec = req_row_rec.get('GPU_NVIDIA_score', 0)
+
+
+        if row_cpu_score < cpu_min or row_gpu_score < gpu_min or row_ram < ram_req or row_storage < storage_req:
+             return 'Disqualified'
+
+        cpu_rec_flag = row_cpu_score >= cpu_rec
+        gpu_rec_flag = row_gpu_score >= gpu_rec
+
+        if cpu_rec_flag and gpu_rec_flag: return 'Recommended'
+        elif cpu_rec_flag or gpu_rec_flag: return 'Mixed'
+        else: return 'Minimum'
+
+    df_filtered_req = df_laptops_filtered[
+        (df_laptops_filtered['RAM'] >= ram_req) & (df_laptops_filtered['Storage'] >= storage_req)
+    ].copy()
+    print(f"Jumlah laptop setelah filter RAM/Storage minimum: {len(df_filtered_req)}")
+
+    if df_filtered_req.empty:
+         print("Tidak ada laptop yang memenuhi persyaratan RAM dan Storage minimum.")
+         return pd.DataFrame()
+
+
+    df_filtered_req['Match_Score'] = df_filtered_req.apply(calculate_match, axis=1)
+    df_filtered_req['Category'] = df_filtered_req.apply(categorize, axis=1)
+
+
+    df_final = df_filtered_req[df_filtered_req['Category'] != 'Disqualified'].copy()
+    df_final = df_final.sort_values(by='Match_Score', ascending=False).reset_index(drop=True)
+    return df_final[['Brand', 'Model', 'CPU', 'GPU', 'RAM', 'Storage', 'Storage type', 'Final Price', 'Category', 'Match_Score']] # Added Storage type
+
+# Example usage with new queries testing intents
+print("\n--- Testing Intent Handling ---")
+query_intent_test_1 = "Laptop lenovo termurah untuk bermain game balapan"
+recommendations_intent_test_1 = get_laptop_recommendations_with_intent(
+    query_intent_test_1, laptop_df, min_req_df, rec_req_df,
     min_req_kb, rec_req_kb,
     model, description_embeddings,
     laptop_df['Model'].tolist(), laptop_df['Brand'].unique().tolist(), unique_keyword_game_map, game_series_map
 )
 
-print("-" * 50)
+print("\n" + "="*50 + "\n")
