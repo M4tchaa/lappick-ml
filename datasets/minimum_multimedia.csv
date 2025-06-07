@@ -1,0 +1,63 @@
+App,Category,CPU,GPU,RAM
+Adobe Premiere Pro,Video,Intel Core i5-6500 / AMD Ryzen 5 1400,NVIDIA GTX 1050 Ti / AMD RX 560,8GB
+Adobe Photoshop,Design,Intel Core i3-6100 / AMD Ryzen 3 1200,NVIDIA GT 1030 / AMD RX 550,8GB
+DaVinci Resolve,Video,Intel Core i5-7400 / AMD Ryzen 5 1400,NVIDIA GTX 1050 Ti / AMD RX 570,8GB
+Blender,3D,Intel Core i5-6500 / AMD Ryzen 5 1400,NVIDIA GTX 1050 / AMD RX 560,8GB
+Autodesk Maya,3D,Intel Core i5-7500 / AMD Ryzen 5 1600,NVIDIA GTX 1050 Ti / AMD RX 570,8GB
+CorelDRAW,Design,Intel Core i3-7100 / AMD Ryzen 3 1200,Intel UHD 630 / AMD Radeon Vega 3,4GB
+VEGAS Pro,Video,Intel Core i5-7300HQ / AMD Ryzen 5 2500U,AMD Radeon Vega 8 Mobile,8GB
+Affinity Photo,Design,Intel Core i3-7100 / AMD Ryzen 3 1200,Intel UHD 630 / AMD Radeon Vega 3,4GB
+Final Cut Pro,Video,Apple M1 / Intel Core i5-7500,Apple M1 GPU / Intel UHD 630,8GB
+Lightroom Classic,Design,Intel Core i3-7100 / AMD Ryzen 3 1200,Intel UHD 630 / AMD Radeon Vega 3,8GB
+Cinema 4D,3D,Intel Core i5-7500 / AMD Ryzen 5 1600,NVIDIA GTX 1050 Ti / AMD RX 560,8GB
+Avid Media Composer,Video,Intel Core i5-7500 / AMD Ryzen 5 1600,NVIDIA GTX 1050 Ti / AMD RX 560,8GB
+HitFilm Express,Video,Intel Core i3-7100 / AMD Ryzen 3 1200,Intel UHD 630 / AMD Radeon Vega 3,4GB
+Capture One,Design,Intel Core i3-7100 / AMD Ryzen 3 1200,Intel UHD 630 / AMD Radeon Vega 3,8GB
+Krita,Design,Intel Pentium Gold G5400 / AMD Athlon 3000G,Intel UHD 610 / AMD Radeon R3,4GB
+SketchUp,Design,Intel Core i3-7100 / AMD Ryzen 3 1200,Intel UHD 630 / AMD Radeon Vega 3,4GB
+PaintTool SAI,Design,Intel Pentium Gold G5400 / AMD Athlon 3000G,Intel UHD 610 / AMD Radeon R3,4GB
+Adobe Illustrator,Design,Intel Core i5-7500 / AMD Ryzen 5 1400,NVIDIA GT 1030 / AMD RX 550,8GB
+ZBrush,3D,Intel Core i5-7500 / AMD Ryzen 5 1400,NVIDIA GTX 1050 / AMD RX 560,8GB
+OpenToonz,Design,Intel Core i3-7100 / AMD Ryzen 3 1200,Intel UHD 630 / AMD Radeon Vega 3,4GB
+Adobe After Effects,Video,Intel Core i5-7500 / AMD Ryzen 5 1400,NVIDIA GTX 1050 Ti / AMD RX 570,12GB
+Adobe Lightroom,Design,Intel Core i5-6500 / AMD Ryzen 5 1400,NVIDIA GT 1030 / AMD RX 550,8GB
+Adobe InDesign,Design,Intel Core i3-7100 / AMD Ryzen 3 1200,Intel UHD 630 / AMD Radeon Vega 3,8GB
+Adobe XD,UI/UX,Intel Core i3-7100 / AMD Ryzen 3 1200,Intel UHD 630 / AMD Radeon Vega 3,4GB
+Adobe Animate,Animation,Intel Core i3-7100 / AMD Ryzen 3 1200,Intel UHD 630 / AMD Radeon Vega 3,8GB
+Adobe Dreamweaver,Web,Intel Core i3-7100 / AMD Ryzen 3 1200,Intel UHD 630 / AMD Radeon Vega 3,4GB
+Adobe Substance 3D Painter,3D,Intel Core i5-7500 / AMD Ryzen 5 1600,NVIDIA GTX 1050 Ti / AMD RX 570,8GB
+Adobe Substance 3D Designer,3D,Intel Core i5-7600 / AMD Ryzen 5 2600,NVIDIA GTX 1050 Ti / AMD RX 570,16GB
+Adobe Substance 3D Sampler,3D,Intel Core i5-7500 / AMD Ryzen 5 1600,NVIDIA GTX 1050 Ti / AMD RX 570,8GB
+Affinity Designer,Design,Intel Core i3-7100 / AMD Ryzen 3 1200,Intel UHD 630 / AMD Radeon Vega 3,4GB
+Affinity Publisher,Design,Intel Core i3-7100 / AMD Ryzen 3 1200,Intel UHD 630 / AMD Radeon Vega 3,4GB
+Lightworks,Video,Intel Core i5-7500 / AMD Ryzen 5 1400,NVIDIA GTX 1050 / AMD RX 560,4GB
+Clip Studio Paint,Design,Intel Pentium Gold G5400 / AMD Athlon 3000G,Intel UHD 610 / AMD Radeon R3,4GB
+GIMP,Design,Intel Core i3-6100 / AMD Ryzen 3 1200,Intel HD 530 / AMD Radeon R5,4GB
+Inkscape,Design,Intel Core i3-6100 / AMD Ryzen 3 1200,Intel HD 530 / AMD Radeon R5,4GB
+Figma,UI/UX,Intel Core i3-7100 / AMD Ryzen 3 1200,Intel UHD 630 / AMD Radeon Vega 3,4GB
+Procreate,Design,Apple A12 Bionic chip (iPad),Apple GPU (iPad),4GB
+3ds Max,3D,Intel Core i5-7500 / AMD Ryzen 5 1600,NVIDIA GTX 1050 Ti / AMD RX 570,8GB
+Houdini,3D,Intel Core i5-8500 / AMD Ryzen 5 2600,NVIDIA GTX 1050 Ti / AMD RX 570,8GB
+Unity,Game Dev,Intel Core i5-7500 / AMD Ryzen 5 1400,NVIDIA GTX 1050 Ti / AMD RX 560,8GB
+Unreal Engine,Game Dev,Intel Core i5-8500 / AMD Ryzen 5 2600,NVIDIA GTX 1060 3GB / AMD RX 580,8GB
+Toon Boom Harmony,Animation,Intel Core i5-7500 / AMD Ryzen 5 1600,NVIDIA GTX 1050 Ti / AMD RX 570,8GB
+Marvelous Designer,3D,Intel Core i5-7500 / AMD Ryzen 5 1600,NVIDIA GTX 1050 Ti / AMD RX 570,8GB
+KeyShot,Rendering,Intel Core i5-7500 / AMD Ryzen 5 1600,NVIDIA GTX 1050 Ti / AMD RX 570,8GB
+Nuke,VFX,Intel Core i7-7700 / AMD Ryzen 5 2600,NVIDIA GTX 1060 3GB / AMD RX 580,16GB
+Arnold Renderer,Rendering,Intel Core i7-7700 / AMD Ryzen 5 2600,NVIDIA GTX 1060 3GB / AMD RX 580,16GB
+Redshift,Rendering,Intel Core i7-7700 / AMD Ryzen 5 2600,NVIDIA GTX 1060 6GB / AMD RX 580,16GB
+Audacity,Audio,Intel Core i3-6100 / AMD Ryzen 3 1200,Intel HD 530 / AMD Radeon R5,4GB
+OBS Studio,Broadcast,Intel Core i5-6500 / AMD Ryzen 5 1400,AMD Radeon Vega 8 / Intel UHD 630,8GB
+REAPER,Audio,Intel Core i5-6500 / AMD Ryzen 5 1400,Intel UHD 630 / AMD Radeon Vega 3,4GB
+Resolume Arena,Live Visuals,Intel Core i5-7500 / AMD Ryzen 5 1600,NVIDIA GTX 1050 Ti / AMD RX 570,4GB
+TouchDesigner,Live Visuals,Intel Core i5-7500 / AMD Ryzen 5 1600,NVIDIA GTX 1060 3GB / AMD RX 580,8GB
+Ableton Live,Audio,Intel Core i5-6500 / AMD Ryzen 5 1400,Intel UHD 630 / AMD Radeon Vega 3,4GB
+Pro Tools,Audio,Intel Core i5-7500 / AMD Ryzen 5 2600,NVIDIA GT 1030 / AMD RX 550,8GB
+FL Studio,Audio,Intel Core i3-6100 / AMD Ryzen 3 1200,Intel HD 530 / AMD Radeon R5,4GB
+Max/MSP,Audio,Intel Core i5-6500 / AMD Ryzen 5 1400,Intel UHD 630 / AMD Radeon Vega 3,4GB
+V-Ray,Rendering,Intel Core i7-7700 / AMD Ryzen 5 2600,NVIDIA GTX 1060 6GB / AMD RX 580,16GB
+Octane Render,Rendering,Intel Core i7-7700 / AMD Ryzen 5 2600,NVIDIA GTX 1060 6GB / AMD RX 580,16GB
+Quixel Mixer,3D,Intel Core i5-7500 / AMD Ryzen 5 1600,NVIDIA GTX 1050 Ti / AMD RX 570,8GB
+Mari,3D,Intel Core i7-7700 / AMD Ryzen 5 2600,NVIDIA GTX 1060 6GB / AMD RX 580,16GB
+Blackmagic Fusion,VFX,Intel Core i5-8500 / AMD Ryzen 5 2600,NVIDIA GTX 1050 Ti / AMD RX 570,8GB
+Adobe Audition,Audio,Intel Core i5-7500 / AMD Ryzen 5 1400,NVIDIA GT 1030 / AMD RX 550,4GB
