@@ -1,7 +1,6 @@
 # File Format
 *.zip
 
-
 # File Specific
 download-kaggle-dataset.ipynb
 faq.ipynb
@@ -9,4 +8,3 @@ explore_*.ipynb
 
 # Folder
 reference/*
-development/*
