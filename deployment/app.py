@@ -1,0 +1,1162 @@
+import pandas as pd
+
+# Load datasets
+laptop_df = pd.read_csv('cleaned_dataset_v3.csv')
+min_req_df = pd.read_csv('minimum_requirements_processed.csv')
+rec_req_df = pd.read_csv('recommended_requirements_processed.csv')
+
+def clean_ram(ram_str):
+    if pd.isna(ram_str) or ram_str.strip() == '' or ram_str.lower() == 'unknown':
+        return 0
+    ram_str = str(ram_str).lower().strip()
+    if 'gb' in ram_str:
+        return int(float(ram_str.replace('gb', '').strip()))
+    elif 'mb' in ram_str:
+        mb_value = float(ram_str.replace('mb', '').strip())
+        return int(mb_value / 1024) if mb_value >= 512 else 1
+    else:
+        try:
+            return int(float(ram_str))
+        except ValueError:
+            return
+
+# Terapkan
+min_req_df['RAM'] = min_req_df['RAM'].apply(clean_ram)
+rec_req_df['RAM'] = rec_req_df['RAM'].apply(clean_ram)
+
+def clean_file_size(size_str):
+    if pd.isna(size_str) or size_str.strip() == '' or size_str.lower() == 'unknown':
+        return 0
+
+    size_str = str(size_str).lower().strip()
+    if 'gb' in size_str:
+        return int(float(size_str.replace('gb', '').strip()))
+    elif 'mb' in size_str:
+        mb_value = float(size_str.replace('mb', '').strip())
+        return int(mb_value / 1024) if mb_value >= 512 else 1
+    else:
+        # fallback jika tidak ada satuan, tapi string bisa dikonversi
+        try:
+            return int(float(size_str))
+        except ValueError:
+            return 0
+
+# Terapkan
+min_req_df['File Size'] = min_req_df['File Size'].apply(clean_file_size)
+rec_req_df['File Size'] = rec_req_df['File Size'].apply(clean_file_size)
+
+def categorize_laptops(game_name, df_min, df_rec, df_laptops, ram_weight=1.0, storage_weight=1.0):
+    game_req = df_min[df_min['Game'].str.lower() == game_name.lower()]
+    game_rec = df_rec[df_rec['Game'].str.lower() == game_name.lower()]
+    if game_req.empty or game_rec.empty:
+        print(f"Game '{game_name}' tidak ditemukan.")
+        return pd.DataFrame()
+
+    req_row_min = game_req.iloc[0]
+    req_row_rec = game_rec.iloc[0]
+
+    ram_req = req_row_min['RAM']
+    storage_req = req_row_min['File Size']
+
+    # --- Vendor detection helper ---
+    def get_gpu_vendor(gpu_name):
+        gpu_name = gpu_name.lower()
+        if any(x in gpu_name for x in ['rtx', 'gtx', 'mx']):
+            return 'nvidia'
+        elif any(x in gpu_name for x in ['radeon', 'rx', 'vega', 'pro']):
+            return 'amd'
+        elif any(x in gpu_name for x in ['integrated', 'iris', 'uhd']):
+            return 'intel'
+        else:
+            return 'intel'
+
+    # --- CPU detection helper ---
+    def get_cpu_vendor(cpu_name):
+        cpu_name = cpu_name.lower()
+        if 'intel' in cpu_name:
+            return 'intel'
+        elif 'amd' in cpu_name:
+            return 'amd'
+        else:
+            return 'intel'
+
+    # --- Ambil score ---
+    def get_cpu_score(row, req_row):
+        vendor = get_cpu_vendor(row['CPU'])
+        if vendor == 'intel':
+            return req_row['CPU_Intel_score']
+        elif vendor == 'amd':
+            return req_row['CPU_AMD_score']
+        else:
+            return req_row['CPU_Intel_score']
+
+    def get_gpu_score(row, req_row):
+        vendor = get_gpu_vendor(row['GPU'])
+        if vendor == 'nvidia':
+            return req_row['GPU_NVIDIA_score']
+        elif vendor == 'amd':
+            return req_row['GPU_AMD_score']
+        elif vendor == 'intel':
+            return req_row['GPU_Intel_score']
+        else:
+            return req_row['GPU_Intel_score']
+
+    # --- Hitung match score ---
+    def calculate_match(row):
+        cpu_req = get_cpu_score(row, req_row_min)
+        gpu_req = get_gpu_score(row, req_row_min)
+        cpu_score = row['CPU_score'] / cpu_req if cpu_req > 0 else 1.0
+        gpu_score = row['GPU_score'] / gpu_req if gpu_req > 0 else 1.0
+        ram_score = (row['RAM'] / ram_req) * ram_weight if ram_req > 0 else 1.0
+        storage_score = (row['Storage'] / storage_req) * storage_weight if storage_req > 0 else 1.0
+        final_score = (cpu_score + gpu_score + ram_score + storage_score) / (2 + ram_weight + storage_weight)
+        return final_score
+
+    # --- Kategorisasi ---
+    def categorize(row):
+        cpu_min = get_cpu_score(row, req_row_min)
+        gpu_min = get_gpu_score(row, req_row_min)
+        cpu_rec = get_cpu_score(row, req_row_rec)
+        gpu_rec = get_gpu_score(row, req_row_rec)
+
+        if row['CPU_score'] < cpu_min or row['GPU_score'] < gpu_min:
+            return 'Disqualified'
+
+        cpu_rec_flag = row['CPU_score'] >= cpu_rec
+        gpu_rec_flag = row['GPU_score'] >= gpu_rec
+
+        if cpu_rec_flag and gpu_rec_flag:
+            return 'Recommended'
+        elif cpu_rec_flag or gpu_rec_flag:
+            return 'Mixed'
+        else:
+            return 'Minimum'
+
+    # --- Filter RAM & Storage ---
+    df_filtered = df_laptops[
+        (df_laptops['RAM'] >= ram_req) & (df_laptops['Storage'] >= storage_req)
+    ].copy()
+
+    # --- Hitung Match_Score ---
+    df_filtered['Match_Score'] = df_filtered.apply(calculate_match, axis=1)
+
+    # --- Tentukan Kategori ---
+    df_filtered['Category'] = df_filtered.apply(categorize, axis=1)
+
+    # --- Buang yang Disqualified ---
+    df_final = df_filtered[df_filtered['Category'] != 'Disqualified'].copy()
+
+    # --- Urutkan ---
+    df_final = df_final.sort_values(by='Match_Score', ascending=False).reset_index(drop=True)
+    return df_final
+
+import pandas as pd
+import re
+
+# --- 2. Cleaning kolom 'Description' ---
+def clean_description(desc):
+    if pd.isnull(desc):
+        return ""
+    # newline -> spasi
+    desc = re.sub(r'\n', ' ', desc)
+    # hapus tanda kutip
+    desc = re.sub(r'["\']', '', desc)
+    # hapus karakter aneh (non-ASCII)
+    desc = re.sub(r'[^\x00-\x7F]+', ' ', desc)
+    # hapus spasi dobel
+    desc = re.sub(r'\s+', ' ', desc)
+    return desc.strip()
+
+rec_req_df['Description'] = rec_req_df['Description'].apply(clean_description)
+min_req_df['Description'] = min_req_df['Description'].apply(clean_description)
+
+# Knowledge Base 1: mapping game → minimum/recommended requirement
+
+# Buat dictionary mapping game ke requirement
+min_req_kb = min_req_df.set_index('Game').to_dict('index')
+rec_req_kb = rec_req_df.set_index('Game').to_dict('index')
+
+# Knowledge Base 2: mapping laptop → CPU, GPU, RAM score, and Brand
+
+from collections import defaultdict
+
+laptop_kb = defaultdict(list)
+
+for _, row in laptop_df.iterrows():
+    model = row['Model']
+    specs = {
+        'Brand': row['Brand'],
+        'CPU_score': row['CPU_score'],
+        'GPU_score': row['GPU_score'],
+        'RAM': row['RAM'],
+        'Final Price': row['Final Price'],
+        'Storage': row['Storage'],
+        'Storage type': row['Storage type']
+    }
+    laptop_kb[model].append(specs)
+
+# Knowledge Base 3: mapping category to games
+
+category_kb = {}
+
+# Loop semua game dan ambil categorynya
+for idx, row in min_req_df.iterrows():
+    categories_str = row['Category']
+    if isinstance(categories_str, str):
+        try:
+            categories = eval(categories_str)
+        except (SyntaxError, NameError):
+            categories = []
+        if isinstance(categories, list):
+            for cat in categories:
+                cat_lower = cat.lower().strip()
+                if cat_lower not in category_kb:
+                    category_kb[cat_lower] = set()
+                category_kb[cat_lower].add(row['Game'])
+    elif isinstance(categories_str, list):
+         for cat in categories_str:
+            cat_lower = cat.lower().strip()
+            if cat_lower not in category_kb:
+                category_kb[cat_lower] = set()
+            category_kb[cat_lower].add(row['Game'])
+
+game_list = min_req_df['Game'].tolist()
+
+# === Game Series Mapping ===
+def create_game_series_map(game_list):
+    series_map = defaultdict(set)
+    # Enhanced patterns to handle cases like eFootball PES series
+    patterns_to_remove = [
+        r'\s*\d+$',  # Remove trailing numbers
+        r'\s*\(?\d{4}\)?$',  # Remove years (e.g., "(2020)", "2020")
+        r'\s*(?:PES|HD|remastered|remake|definitive edition|enhanced edition|anniversary edition)\s*$',  # Remove version indicators
+        r'\s*:\s*.*$',  # Remove subtitles after colon
+        r'\s*-+\s*.*$',  # Remove subtitles after dash
+        r'\s*PES\s+\d{4}$',  # Specific pattern for "PES <YEAR>"
+    ]
+
+    for game in game_list:
+        series_name = game
+        for pattern in patterns_to_remove:
+            series_name = re.sub(pattern, '', series_name, flags=re.IGNORECASE).strip()
+
+        # Additional cleanup: Remove standalone PES without year
+        series_name = re.sub(r'\s*PES\s*$', '', series_name, flags=re.IGNORECASE).strip()
+
+        if series_name and series_name != game:
+            series_map[series_name.lower()].add(game)
+
+    # Include series with at least 2 games
+    return {series: list(games) for series, games in series_map.items() if len(games) > 1}
+
+# Create the game_series_map
+game_series_map = create_game_series_map(game_list)
+
+import re
+import string
+from collections import defaultdict
+from Sastrawi.StopWordRemover.StopWordRemoverFactory import StopWordRemoverFactory
+from nltk.tokenize import RegexpTokenizer
+from fuzzywuzzy import process, fuzz
+
+# Gunakan tokenizer berbasis regex
+tokenizer = RegexpTokenizer(r'\w+')
+
+# Inisialisasi stopword remover Sastrawi
+factory = StopWordRemoverFactory()
+stopwords_sastrawi = set(factory.get_stop_words())
+
+# Tambahkan stopwords tambahan
+additional_stopwords = {
+    'cocok', 'buat', 'main', 'dengan', 'rekomendasi', 'spesifikasi', 'spek',
+    'apa', 'yang', 'laptop', 'harga', 'rp', 'ribu', 'juta', 'budget',
+    'model', 'merek', 'brand', 'merk', 'duit', 'uang', 'dana', 'termurah'
+}
+stopwords_sastrawi.update(additional_stopwords)
+
+# Define the lists needed for the pipeline
+game_list = min_req_df['Game'].tolist()
+laptop_list = laptop_df['Model'].tolist()
+laptop_brand_list = laptop_df['Brand'].unique().tolist()
+
+# === Stopword Removal ===
+def remove_stopwords(tokens):
+    return [t for t in tokens if t not in stopwords_sastrawi]
+
+# === Basic Preprocessing ===
+def basic_preprocessing(text):
+    text = text.lower()
+    text = re.sub(r'[’‘]', "'", text)  # Normalisasi apostrof
+    text = re.sub(f"[{string.punctuation}]", " ", text)
+    tokens = tokenizer.tokenize(text)
+    return tokens
+
+# === Keyword to Game Mapping ===
+def create_keyword_game_map(game_list, stopwords):
+    keyword_candidate_map = defaultdict(list)
+    for game in game_list:
+        tokens = basic_preprocessing(game)
+        tokens = remove_stopwords(tokens)
+        for token in tokens:
+            if len(token) > 2 or token.isdigit():
+                keyword_candidate_map[token].append(game)
+
+    unique_keyword_map = {}
+    for keyword, games in keyword_candidate_map.items():
+        if len(games) == 1:
+            unique_keyword_map[keyword] = games[0]
+
+    return unique_keyword_map
+
+# Create the unique_keyword_game_map
+unique_keyword_game_map = create_keyword_game_map(game_list, stopwords_sastrawi)
+
+# === Synonym Mapping ===
+SYNONYM_MAPPING = {
+    # Action
+    "aksi": "action",
+    "laga": "action",
+    "action": "action",
+
+    # Adventure
+    "petualangan": "adventure",
+    "openworld": "adventure",
+    "open-world": "adventure",
+    "adventure": "adventure",
+
+    # Animation & Modeling
+    "animasi": "animation & modeling",
+    "modeling": "animation & modeling",
+    "animasi 3d": "animation & modeling",
+
+    # Casual
+    "santai": "casual",
+    "kasual": "casual",
+    "casual": "casual",
+
+    # Design & Illustration
+    "desain": "design & illustration",
+    "ilustrasi": "design & illustration",
+    "gambar": "design & illustration",
+
+    # Early Access
+    "akses awal": "early access",
+    "pre-release": "early access",
+
+    # FPS
+    "tembak": "fps",
+    "tembak-tembakan": "fps",
+    "first person": "fps",
+    "fps": "fps",
+
+    # Fighting
+    "pertarungan": "fighting",
+    "fighter": "fighting",
+    "bela diri": "fighting",
+
+    # Free to Play
+    "gratis": "free to play",
+    "f2p": "free to play",
+    "free": "free to play",
+
+    # Game Development
+    "pengembangan game": "game development",
+    "dev game": "game development",
+    "pembuatan game": "game development",
+
+    # Gore
+    "kekerasan grafis": "gore",
+    "darah": "gore",
+    "gore": "gore",
+
+    # Indie
+    "indie": "indie",
+    "independen": "indie",
+    "permainan indie": "indie",
+
+    # JRPG
+    "rpg jepang": "jrpg",
+    "jrpg": "jrpg",
+    "anime rpg": "jrpg",
+
+    # MMO
+    "mmo": "mmo",
+    "multiplayer masif": "mmo",
+    "game online": "mmo",
+
+    # MOBA
+    "moba": "moba",
+    "arena battle": "moba",
+    "dota-like": "moba",
+
+    # Photo Editing
+    "edit foto": "photo editing",
+    "foto": "photo editing",
+    "photoshop": "photo editing",
+
+    # Platformer
+    "platform": "platformer",
+    "lompat": "platformer",
+    "platformer": "platformer",
+
+    # RPG
+    "role playing": "rpg",
+    "rpg": "rpg",
+    "peran": "rpg",
+
+    # Racing
+    "balapan": "racing",
+    "balap": "racing",
+    "racing": "racing",
+
+    # Rogue-like
+    "roguelike": "rogue-like",
+    "permadeath": "rogue-like",
+    "prosedural": "rogue-like",
+
+    # Sexual Content
+    "konten dewasa": "sexual content",
+    "seksual": "sexual content",
+    "dewasa": "sexual content",
+
+    # Simulation
+    "simulasi": "simulation",
+    "sim": "simulation",
+    "simulator": "simulation",
+
+    # Space
+    "angkasa": "space",
+    "luar angkasa": "space",
+    "space": "space",
+
+    # Sports
+    "olahraga": "sports",
+    "sport": "sports",
+    "olahraga elektronik": "sports",
+
+    # Strategy
+    "strategi": "strategy",
+    "strategic": "strategy",
+    "taktik": "strategy",
+
+    # Third-person shooter
+    "tps": "third-person shooter",
+    "shooter orang ketiga": "third-person shooter",
+    "third person": "third-person shooter",
+
+    # Turn-based
+    "giliran": "turn-based",
+    "turn based": "turn-based",
+    "tb": "turn-based",
+
+    # Unknown
+    "tidak diketahui": "unknown",
+    "unknown": "unknown",
+    "misteri": "unknown",
+
+    # Utilities
+    "alat": "utilities",
+    "tool": "utilities",
+    "utilitas": "utilities",
+
+    # Video Production
+    "produksi video": "video production",
+    "editing video": "video production",
+    "video editor": "video production",
+
+    # Violent
+    "kekerasan": "violent",
+    "violent": "violent",
+    "brutal": "violent"
+}
+def map_synonyms(tokens):
+    return [SYNONYM_MAPPING.get(t, t) for t in tokens]
+
+# === Game Series Handling ===
+def handle_game_series(found_games, query_lower, game_series_map):
+    found_games = set(found_games)
+    series_to_add = set()
+
+    # Fungsi untuk ekstrak angka dari judul game (ambil angka terakhir)
+    def extract_number(game_name):
+        numbers = re.findall(r'\d+', game_name)
+        return int(numbers[-1]) if numbers else 0
+
+    for series_name, games_in_series in game_series_map.items():
+        # Cek apakah nama seri disebut di query (dengan regex word boundary)
+        if re.search(r'\b' + re.escape(series_name.lower()) + r'\b', query_lower):
+            # Cek apakah sudah ada game spesifik dari seri ini
+            specific_found = any(game in found_games for game in games_in_series)
+
+            # Jika belum ada spesifik, tambahkan game terbaru dari seri
+            if not specific_found and games_in_series:
+                # Urutkan game berdasarkan versi (descending)
+                sorted_games = sorted(games_in_series, key=extract_number, reverse=True)
+                series_to_add.add(sorted_games[0])
+
+    found_games.update(series_to_add)
+    return list(found_games)
+
+# === Extract Entities and Budget ===
+def extract_entities_and_budget(user_query, game_list, laptop_list, laptop_brand_list,
+                               unique_keyword_game_map, game_series_map,
+                               score_cutoff_high=95, score_cutoff_low_game=90,
+                               score_cutoff_low_laptop=80):
+    found_games = set()
+    found_laptops = set()
+    extracted_budget = None
+
+    query_lower = user_query.lower()
+    query_tokens = basic_preprocessing(user_query)
+    query_tokens_cleaned = remove_stopwords(query_tokens)
+
+    # Ekstrak budget
+    budget_pattern = r'(?:harga|rp|rp\.|budget)\s*:?\s*(\d+(?:[,\.]\d+)?)\s*(rb|ribu|jt|juta)?|\b(\d+(?:[,\.]\d+)?)\s*(rb|ribu|jt|juta)\b'
+    budget_match = re.search(budget_pattern, query_lower)
+    budget_tokens = set()
+
+    if budget_match:
+        amount1 = budget_match.group(1)
+        unit1 = budget_match.group(2)
+        amount2 = budget_match.group(3)
+        unit2 = budget_match.group(4)
+
+        amount_str = amount1 if amount1 else amount2
+        unit = unit1 if unit1 else unit2
+
+        if amount_str:
+            try:
+                # Replace comma with dot for float conversion
+                amount = float(amount_str.replace(',', '.'))
+                if unit in ['juta', 'jt']:
+                    extracted_budget = int(amount * 1_000_000)
+                elif unit in ['ribu', 'rb']:
+                    extracted_budget = int(amount * 1_000)
+                else:
+                    extracted_budget = int(amount)
+                # Add both original and normalized amount string to budget_tokens
+                budget_tokens.add(amount_str.replace(',', '.'))
+                budget_tokens.add(amount_str.replace('.', ','))
+
+            except ValueError:
+                extracted_budget = None
+
+    # Hapus token budget dari pemrosesan game
+    game_matching_tokens = [t for t in query_tokens_cleaned if t not in budget_tokens]
+    cleaned_query_string_for_game = " ".join(game_matching_tokens)
+
+    # Angka yang ada di query untuk game (pastikan tidak termasuk angka budget)
+    query_numbers = set(t for t in game_matching_tokens if t.isdigit())
+
+    # 1. Deteksi LAPTOP terlebih dahulu
+    laptop_entities = set(laptop_list + laptop_brand_list)
+
+    # Prioritas 1: Exact matching untuk laptop
+    for entity in laptop_entities:
+        if re.search(r'\b' + re.escape(entity.lower()) + r'\b', query_lower):
+            found_laptops.add(entity)
+
+    # Prioritas 2: Fuzzy matching untuk laptop (jika belum ditemukan)
+    if not found_laptops:
+        for entity in laptop_entities:
+            match = process.extractOne(
+                entity,
+                [query_lower],
+                scorer=fuzz.token_set_ratio,
+                score_cutoff=score_cutoff_high
+            )
+            if match:
+                found_laptops.add(entity)
+
+    # EKSTRAK TOKEN LAPTOP YANG TERDETEKSI
+    laptop_tokens = set()
+    for laptop in found_laptops:
+        # Preprocess nama laptop untuk ekstrak token kunci
+        tokens = basic_preprocessing(laptop)
+        tokens = remove_stopwords(tokens)
+        laptop_tokens.update(tokens)
+
+    # 2. PROSES GAME DENGAN MENGHINDARI TOKEN LAPTOP
+    # Hapus token yang terkait laptop dan budget
+    game_matching_tokens = [
+        t for t in query_tokens_cleaned
+        if t not in budget_tokens and t not in laptop_tokens
+    ]
+
+    cleaned_query_string_for_game = " ".join(game_matching_tokens)
+    query_numbers = set(t for t in game_matching_tokens if t.isdigit())
+
+    # 1. High threshold fuzzy matching dengan token_set_ratio
+    matches_high = process.extractBests(
+        query_lower,
+        game_list,
+        scorer=fuzz.token_set_ratio,
+        score_cutoff=95,
+        limit=5
+    )
+    for match, score in matches_high:
+        found_games.add(match)
+
+    # 2. Unique Keyword Matching for Games
+    for token in game_matching_tokens:
+        if token in unique_keyword_game_map:
+            game_from_keyword = unique_keyword_game_map[token]
+            found_games.add(game_from_keyword)
+
+    # 3. Tightened Fuzzy Matching for Games
+    if not found_games:
+        matches_low = process.extract(
+            cleaned_query_string_for_game,
+            game_list,
+            limit=10
+        )
+        for match, score in matches_low:
+            if match in found_games:
+                continue
+
+            # Filter berdasarkan score
+            if score < score_cutoff_low_game:
+                continue
+
+            # Hitung overlap token
+            match_tokens = set(remove_stopwords(basic_preprocessing(match)))
+            query_token_set = set(game_matching_tokens)
+            overlap = match_tokens & query_token_set
+
+            # Angka di game
+            match_numbers = set(re.findall(r'\d+', match))
+
+            # Jika query menyebut angka, game harus mengandung angka yang sama
+            if query_numbers and match_numbers:
+                if not (query_numbers & match_numbers):
+                    continue
+
+            # Jika game mengandung angka, tapi query tidak menyebut angka spesifik
+            elif match_numbers and not query_numbers:
+                continue
+
+            # Minimal 50% token match atau minimal 2 token cocok
+            min_required = max(1, min(2, len(match_tokens)//2))
+            if len(overlap) >= min_required:
+                found_games.add(match)
+
+    # 4. Handle Game Series
+    found_games = handle_game_series(found_games, query_lower, game_series_map)
+
+    # 5. Filter game berdasarkan angka query
+    if query_numbers:
+        filtered_games = []
+        for game in found_games:
+            game_numbers = set(re.findall(r'\d+', game))
+            if game_numbers:
+                if not (query_numbers & game_numbers):
+                    continue
+            filtered_games.append(game)
+        found_games = filtered_games
+
+    # Laptop Matching
+    laptop_entities = set(laptop_list + laptop_brand_list)
+
+    # Prioritas 1: Exact matching
+    for entity in laptop_entities:
+        if re.search(r'\b' + re.escape(entity.lower()) + r'\b', query_lower):
+            found_laptops.add(entity)
+
+    # Prioritas 2: Fuzzy matching (only if no exact matches found for laptops)
+    if not found_laptops:
+        for entity in laptop_entities:
+            # Use the cleaned query string for game matching, excluding budget tokens
+            match = process.extractOne(
+                entity,
+                [cleaned_query_string_for_game],
+                scorer=fuzz.token_set_ratio,
+                score_cutoff=score_cutoff_high
+            )
+            if match:
+                found_laptops.add(entity)
+
+    return list(found_games), list(found_laptops), extracted_budget
+
+# === Pipeline Function ===
+def nlp_pipeline_fuzzy(user_query, game_list, laptop_list, laptop_brand_list,
+                       unique_keyword_game_map, game_series_map):
+    tokens = basic_preprocessing(user_query)
+    tokens = remove_stopwords(tokens)
+    tokens = map_synonyms(tokens)
+    found_games, found_laptops, extracted_budget = extract_entities_and_budget(
+        user_query, game_list, laptop_list, laptop_brand_list,
+        unique_keyword_game_map, game_series_map,
+        score_cutoff_low_game=90
+    )
+    return {
+        "tokens": tokens,
+        "found_games": found_games,
+        "found_laptops": found_laptops,
+        "budget": extracted_budget
+    }
+
+from sentence_transformers import SentenceTransformer
+import pandas as pd
+
+# Ambil deskripsi game
+descriptions = min_req_df['Description'].fillna('').tolist()
+model = SentenceTransformer('paraphrase-multilingual-MiniLM-L12-v2')
+
+# Buat embeddings
+description_embeddings = model.encode(descriptions, convert_to_tensor=True)
+
+print("Shape embeddings:", description_embeddings.shape)
+
+import torch
+
+def search_games(query, model, description_embeddings, df, top_n=5, category_kb=None, category_boost=0.5): # Increased default boost
+    # Encode query
+    query_embedding = model.encode(query, convert_to_tensor=True)
+
+    # Hitung cosine similarity awal
+    similarities = torch.nn.functional.cosine_similarity(query_embedding, description_embeddings)
+
+    # Preprocess query untuk category matching
+    query_tokens_cleaned = basic_preprocessing(query)
+    query_tokens_cleaned = remove_stopwords(query_tokens_cleaned)
+    query_tokens_cleaned = map_synonyms(query_tokens_cleaned)
+
+    # Beri bobot berdasarkan kategori yang cocok
+    boosted_similarities = similarities.clone()
+    for i in range(len(df)):
+        game_categories_str = df.iloc[i]["Category"]
+        game_categories = []
+        if isinstance(game_categories_str, str):
+             try:
+                 game_categories = eval(game_categories_str)
+             except (SyntaxError, NameError):
+                  pass
+        elif isinstance(game_categories_str, list):
+             game_categories = game_categories_str
+
+
+        if game_categories:
+            # Check if any cleaned query token matches any category of the game
+            game_categories_lower = set([cat.lower().strip() for cat in game_categories])
+            # Check for intersection between cleaned query tokens and game categories
+            if any(token in game_categories_lower for token in query_tokens_cleaned):
+                boosted_similarities[i] += category_boost
+
+    # Urutkan berdasarkan boosted similarities
+    top_indices = boosted_similarities.argsort(descending=True)[:top_n]
+
+    results = []
+    for idx in top_indices:
+        idx = idx.item()
+        results.append({
+            "game": df.iloc[idx]["Game"],
+            "category": df.iloc[idx]["Category"],
+            "similarity": boosted_similarities[idx].item()
+        })
+    return results
+
+def recognize_intent_simple(query, found_games, found_laptops, budget):
+    query_lower = query.lower()
+    query_tokens = set(basic_preprocessing(query_lower))
+
+    intent = "FIND_LAPTOP_FOR_GAME"
+
+    # Check for specific keywords indicating intent
+    if "terbaik" in query_tokens or "tertinggi" in query_tokens or "high performance" in query_lower:
+        # Prioritize recommended specs or highest match score
+        intent = "FIND_BEST_LAPTOP_FOR_GAME"
+    elif "termurah" in query_tokens or "paling murah" in query_lower or "low budget" in query_lower:
+        # Prioritize minimum specs or lowest price within category
+        intent = "FIND_CHEAPEST_LAPTOP_FOR_GAME"
+    elif "bandingkan" in query_tokens or "compare" in query_tokens:
+        # Needs at least two laptop entities to be meaningful
+        if len(found_laptops) >= 2:
+            intent = "COMPARE_LAPTOPS"
+        else:
+            # If compare keyword is present but not enough laptops, fallback or ask for clarification
+            intent = "UNKNOWN"
+    elif (found_laptops or budget is not None) and not found_games:
+         intent = "FILTER_LAPTOPS"
+
+    # If game is detected and no other strong intent, it's likely about finding a laptop for that game
+    if found_games and intent in ["FIND_LAPTOP_FOR_GAME", "FILTER_LAPTOPS"]:
+        intent = "FIND_LAPTOP_FOR_GAME"
+
+    # If nothing clear is found and no game/laptop detected
+    if not found_games and not found_laptops and budget is None:
+        intent = "GENERAL_QUERY"
+
+    return intent
+
+"""# Fungsi Utama"""
+
+# --- Fungsi Rekomendasi Utama ---
+def get_laptop_recommendations_with_intent(user_query, laptop_df, min_req_df, rec_req_df,
+                               min_req_kb, rec_req_kb,
+                               model, description_embeddings,
+                               laptop_list, laptop_brand_list, unique_keyword_game_map, game_series_map,
+                               category_boost_value=1.0,
+                               top_n_semantic_games=10
+                               ):
+
+    print(f"Query Pengguna: {user_query}")
+
+    # 1. Jalankan NLP Pipeline & Kenali Intent
+    pipeline_result = nlp_pipeline_fuzzy(user_query, min_req_df['Game'].tolist(), laptop_df['Model'].tolist(), laptop_df['Brand'].unique().tolist(), unique_keyword_game_map, game_series_map)
+    found_games = pipeline_result['found_games']
+    found_laptops_entities = pipeline_result['found_laptops']
+    extracted_budget = pipeline_result['budget']
+
+    detected_intent = recognize_intent_simple(user_query, found_games, found_laptops_entities, extracted_budget)
+
+    print(f"Hasil NLP Pipeline: Game={found_games}, Laptop/Entity={found_laptops_entities}, Budget={extracted_budget}")
+    print(f"Intent Terdeteksi: {detected_intent}")
+
+    # --- Logika berdasarkan Intent ---
+    if detected_intent == "COMPARE_LAPTOPS":
+        if len(found_laptops_entities) < 2:
+             return pd.DataFrame({"Status": ["Informasi Kurang"], "Pesan": ["Mohon sebutkan minimal dua nama laptop atau brand untuk dibandingkan."]})
+
+        # Implement comparison logic here (e.g., show specs side-by-side)
+        print("\nIntent: Compare Laptops. Implementasi perbandingan spesifikasi laptop...")
+        # Filter laptop_df to show specs for the detected laptop entities
+        comparison_laptops = laptop_df[
+            laptop_df['Model'].str.lower().isin([ent.lower() for ent in found_laptops_entities if ent in laptop_df['Model'].tolist()]) |
+            laptop_df['Brand'].str.lower().isin([ent.lower() for ent in found_laptops_entities if ent in laptop_df['Brand'].unique().tolist()])
+        ].copy()
+        if comparison_laptops.empty:
+             return pd.DataFrame({"Status": ["Tidak Ditemukan"], "Pesan": ["Tidak ada laptop yang cocok dengan yang ingin Anda bandingkan."]})
+        return comparison_laptops[['Brand', 'Model', 'CPU', 'GPU', 'RAM', 'Storage', 'Storage type', 'Screen', 'Final Price']]
+
+    elif detected_intent == "FILTER_LAPTOPS":
+         if not found_laptops_entities and extracted_budget is None:
+              return pd.DataFrame({"Status": ["Informasi Kurang"], "Pesan": ["Mohon sebutkan brand laptop, model, atau budget yang Anda inginkan."]})
+
+         print("\nIntent: Filter Laptops. Menerapkan filter berdasarkan kriteria yang terdeteksi...")
+         laptops_to_evaluate = laptop_df.copy()
+
+         # Filter Budget
+         if extracted_budget is not None and extracted_budget > 0:
+             print(f"  - Memfilter laptop dengan budget <= {extracted_budget}")
+             laptops_to_evaluate = laptops_to_evaluate[laptops_to_evaluate['Final Price'] <= extracted_budget].copy()
+             print(f"    Jumlah laptop setelah filter budget: {len(laptops_to_evaluate)}")
+
+
+         # Filter Brand atau Model Spesifik
+         if found_laptops_entities:
+             print(f"  - Memfilter laptop berdasarkan entitas: {found_laptops_entities}")
+             filter_mask = pd.Series([False] * len(laptops_to_evaluate), index=laptops_to_evaluate.index)
+             for entity in found_laptops_entities:
+                 if entity in laptop_brand_list:
+                     filter_mask |= (laptops_to_evaluate['Brand'].str.lower() == entity.lower())
+                 elif entity in laptop_list:
+                      filter_mask |= (laptops_to_evaluate['Model'].str.lower() == entity.lower())
+                 else:
+                     # Use fuzzy matching for entities not in the predefined lists
+                     brand_match = process.extractOne(entity, laptops_to_evaluate['Brand'].unique().tolist(), score_cutoff=90)
+                     model_match = process.extractOne(entity, laptops_to_evaluate['Model'].tolist(), score_cutoff=90)
+                     if brand_match and brand_match[1] >= 90:
+                          filter_mask |= (laptops_to_evaluate['Brand'].str.lower() == brand_match[0].lower())
+                     if model_match and model_match[1] >= 90:
+                          filter_mask |= (laptops_to_evaluate['Model'].str.lower() == model_match[0].lower())
+
+
+             laptops_to_evaluate = laptops_to_evaluate[filter_mask].copy()
+             print(f"    Jumlah laptop setelah filter entitas: {len(laptops_to_evaluate)}")
+
+         if laptops_to_evaluate.empty:
+             print("Tidak ada laptop yang cocok dengan kriteria filter.")
+             return pd.DataFrame({"Status": ["Tidak Ditemukan"], "Pesan": ["Tidak ada laptop yang cocok dengan kriteria filter Anda."]})
+
+         print("\nHasil Laptop yang Difilter:")
+         return laptops_to_evaluate[['Brand', 'Model', 'CPU', 'GPU', 'RAM', 'Storage', 'Storage type', 'Final Price']]
+
+
+    elif detected_intent in ["FIND_BEST_LAPTOP_FOR_GAME", "FIND_CHEAPEST_LAPTOP_FOR_GAME", "FIND_LAPTOP_FOR_GAME"]:
+        # --- Logika yang sudah ada untuk rekomendasi laptop berdasarkan game ---
+        game_targets = []
+        if not found_games:
+            print("\nTidak ada game spesifik terdeteksi dari query. Melakukan Semantic Search...")
+            semantic_results = search_games(user_query, model, description_embeddings, min_req_df, top_n=top_n_semantic_games, category_boost=category_boost_value)
+            game_targets = [res['game'] for res in semantic_results if res['similarity'] > 0.6]
+            if game_targets:
+                 print(f"  - Menemukan game relevan dari Semantic Search: {game_targets}")
+            else:
+                 print("  - Semantic Search tidak menemukan game relevan.")
+                 return pd.DataFrame({"Status": ["Tidak Ditemukan"], "Pesan": ["Tidak dapat menemukan game relevan dari query Anda."]})
+        else:
+             game_targets = found_games
+             print(f"\nMenggunakan game yang terdeteksi spesifik oleh NLP Pipeline: {game_targets}")
+
+        target_game_min_req = None
+        target_game_rec_req = None
+        target_game_name = None
+        max_requirement_score = -1
+
+        if game_targets:
+            print(f"Mengevaluasi persyaratan untuk game target: {game_targets}")
+            valid_game_targets = []
+            for game_name in game_targets:
+                min_req = min_req_kb.get(game_name)
+                rec_req = rec_req_kb.get(game_name)
+
+                if min_req and rec_req:
+                    valid_game_targets.append(game_name)
+                    current_requirement_score = (min_req.get('CPU_Intel_score', 0) + min_req.get('CPU_AMD_score', 0) +
+                                                 min_req.get('GPU_NVIDIA_score', 0) + min_req.get('GPU_AMD_score', 0) + min_req.get('GPU_Intel_score', 0))
+
+                    print(f"  - {game_name}: Requirement Score = {current_requirement_score}")
+
+                    if current_requirement_score > max_requirement_score:
+                        max_requirement_score = current_requirement_score
+                        target_game_name = game_name
+                        target_game_min_req = min_req
+                        target_game_rec_req = rec_req
+
+            if not target_game_name:
+                 print("Tidak dapat menemukan persyaratan yang valid untuk game target dari knowledge base.")
+                 return pd.DataFrame({"Status": ["Tidak Ditemukan"], "Pesan": ["Tidak dapat menemukan persyaratan yang valid untuk game target dari knowledge base."]})
+
+            game_targets = valid_game_targets
+
+            print(f"\nMemilih game dengan persyaratan tertinggi: {target_game_name}")
+            print(f"Persyaratan Min: CPU={target_game_min_req['CPU_Intel']}/{target_game_min_req['CPU_AMD']}, GPU={target_game_min_req['GPU_NVIDIA']}/{target_game_min_req['GPU_AMD']}/{target_game_min_req['GPU_Intel']}, RAM: {target_game_min_req['RAM']} GB, Storage: {target_game_min_req['File Size']} GB")
+            print(f"Persyaratan Rec: CPU={target_game_rec_req['CPU_Intel']}/{target_game_rec_req['CPU_AMD']}, GPU={target_game_rec_req['GPU_NVIDIA']}/{target_game_rec_req['GPU_AMD']}/{target_game_rec_req['GPU_Intel']}, RAM: {target_game_rec_req['RAM']} GB, Storage: {target_game_rec_req['File Size']} GB")
+
+
+        else:
+             print("Tidak ada game relevan yang ditemukan dari query setelah semua upaya.")
+             return pd.DataFrame({"Status": ["Tidak Ditemukan"], "Pesan": ["Tidak dapat menemukan game relevan dari query Anda."]})
+
+
+        # Siapkan Daftar Laptop
+        laptops_to_evaluate = laptop_df.copy()
+
+        # Filter Budget
+        if extracted_budget is not None and extracted_budget > 0:
+            print(f"\nMemfilter laptop dengan budget <= {extracted_budget:,}")
+            laptops_to_evaluate = laptops_to_evaluate[laptops_to_evaluate['Final Price'] <= extracted_budget].copy()
+            print(f"Jumlah laptop setelah filter budget: {len(laptops_to_evaluate)}")
+            if laptops_to_evaluate.empty:
+                print("Tidak ada laptop dalam budget yang terdeteksi.")
+                return pd.DataFrame({"Status": ["Tidak Ditemukan"], "Pesan": [f"Tidak ada laptop dalam budget {extracted_budget:,} yang tersedia."]})
+
+
+        # Filter Brand atau Model Spesifik (if any mentioned alongside game)
+        if found_laptops_entities:
+            print(f"Memfilter laptop berdasarkan entitas: {found_laptops_entities}")
+            filter_mask = pd.Series([False] * len(laptops_to_evaluate), index=laptops_to_evaluate.index)
+            for entity in found_laptops_entities:
+                if entity in laptop_brand_list:
+                    filter_mask |= (laptops_to_evaluate['Brand'].str.lower() == entity.lower())
+                elif entity in laptop_list:
+                     filter_mask |= (laptops_to_evaluate['Model'].str.lower() == entity.lower())
+                else:
+                    # Use fuzzy matching for entities not in the predefined lists
+                    brand_match = process.extractOne(entity, laptops_to_evaluate['Brand'].unique().tolist(), score_cutoff=90)
+                    model_match = process.extractOne(entity, laptops_to_evaluate['Model'].tolist(), score_cutoff=90)
+                    if brand_match and brand_match[1] >= 90:
+                         filter_mask |= (laptops_to_evaluate['Brand'].str.lower() == brand_match[0].lower())
+                    if model_match and model_match[1] >= 90:
+                         filter_mask |= (laptops_to_evaluate['Model'].str.lower() == model_match[0].lower())
+
+            laptops_to_evaluate = laptops_to_evaluate[filter_mask].copy()
+            print(f"Jumlah laptop setelah filter entitas: {len(laptops_to_evaluate)}")
+
+            if laptops_to_evaluate.empty:
+                print(f"Tidak ada laptop yang cocok dengan entitas '{', '.join(found_laptops_entities)}' dalam budget yang terdeteksi.")
+                return pd.DataFrame({"Status": ["Tidak Ditemukan"], "Pesan": [f"Tidak ada laptop yang cocok dengan '{', '.join(found_laptops_entities)}' dalam kriteria Anda."]})
+
+
+        print("\nMengkategorikan laptop berdasarkan persyaratan game target...")
+        final_recommendations = categorize_laptops_adapted( # Use the adapted function
+            laptops_to_evaluate,
+            target_game_min_req,
+            target_game_rec_req
+        )
+
+        if final_recommendations.empty:
+            print("\nTidak ada rekomendasi laptop yang ditemukan berdasarkan kriteria Anda.")
+            print("Tidak ada laptop yang memenuhi persyaratan minimum game yang relevan di antara laptop yang sudah difilter.")
+            return pd.DataFrame({"Status": ["Tidak Ditemukan"], "Pesan": ["Tidak ada rekomendasi laptop yang memenuhi persyaratan minimum game yang relevan dalam kriteria Anda."]})
+        else:
+            print("\nHasil Rekomendasi Laptop:")
+            # Add sorting based on intent (e.g., best -> sort by Match_Score DESC, cheapest -> sort by Final Price ASC within categories)
+            if detected_intent == "FIND_BEST_LAPTOP_FOR_GAME":
+                final_recommendations['Category_Order'] = final_recommendations['Category'].apply(
+                    lambda x: 0 if x == 'Recommended' else (1 if x == 'Mixed' else 2)
+                )
+                final_recommendations = final_recommendations.sort_values(by=['Category_Order', 'Match_Score'], ascending=[True, False]).drop(columns='Category_Order')
+                print("\nDiurutkan berdasarkan Match Score (Terbaik ke Terburuk) dalam setiap kategori.")
+            elif detected_intent == "FIND_CHEAPEST_LAPTOP_FOR_GAME":
+                 final_recommendations['Category_Order'] = final_recommendations['Category'].apply(
+                    lambda x: 0 if x == 'Recommended' else (1 if x == 'Mixed' else 2)
+                 )
+                 final_recommendations = final_recommendations.sort_values(by=['Category_Order', 'Final Price', 'Match_Score'], ascending=[True, True, False]).drop(columns='Category_Order') # Sort by price then match score
+                 print("\nDiurutkan berdasarkan Harga (Termurah ke Termahal) dalam setiap kategori.")
+            else: # Default FIND_LAPTOP_FOR_GAME
+                 final_recommendations['Category_Order'] = final_recommendations['Category'].apply(
+                    lambda x: 0 if x == 'Recommended' else (1 if x == 'Mixed' else 2)
+                 )
+                 final_recommendations = final_recommendations.sort_values(by=['Category_Order', 'Match_Score'], ascending=[True, False]).drop(columns='Category_Order')
+                 print("\nDiurutkan berdasarkan Match Score (Default).")
+            return final_recommendations
+
+    else:
+        print("\nIntent tidak dikenali atau tidak didukung saat ini.")
+        return pd.DataFrame({"Status": ["Intent Tidak Dikenali"], "Pesan": ["Mohon maaf, niat Anda belum dapat saya proses saat ini."]})
+
+
+# Define categorize_laptops_adapted outside the main function
+def categorize_laptops_adapted(df_laptops_filtered, req_row_min, req_row_rec, ram_weight=1.0, storage_weight=1.0, storage_type_weight=0.5): # Added storage_type_weight
+    if df_laptops_filtered.empty:
+         return pd.DataFrame()
+
+    ram_req = req_row_min['RAM']
+    storage_req = req_row_min['File Size']
+
+    def get_gpu_vendor(gpu_name):
+        if pd.isna(gpu_name): return 'intel'
+        gpu_name = str(gpu_name).lower()
+        if any(x in gpu_name for x in ['rtx', 'gtx', 'mx']): return 'nvidia'
+        elif any(x in gpu_name for x in ['radeon', 'rx', 'vega', 'pro']): return 'amd'
+        elif any(x in gpu_name for x in ['integrated', 'iris', 'uhd', 'hd graphics']): return 'intel'
+        else: return 'intel'
+
+    def get_cpu_vendor(cpu_name):
+        if pd.isna(cpu_name): return 'intel'
+        cpu_name = str(cpu_name).lower()
+        if 'intel' in cpu_name or any(x in cpu_name for x in ['core', 'pentium', 'celeron', 'xeon', 'evo']): return 'intel'
+        elif 'amd' in cpu_name or any(x in cpu_name for x in ['ryzen', 'fx', 'athlon', 'phenom', 'opteron']): return 'amd'
+        else: return 'intel'
+
+    def get_cpu_req_score(row, req_row):
+        vendor = get_cpu_vendor(row['CPU'])
+        if vendor == 'intel': return req_row.get('CPU_Intel_score', 0)
+        elif vendor == 'amd': return req_row.get('CPU_AMD_score', 0)
+        else: return req_row.get('CPU_Intel_score', 0)
+
+    def get_gpu_req_score(row, req_row):
+        vendor = get_gpu_vendor(row['GPU'])
+        if vendor == 'nvidia': return req_row.get('GPU_NVIDIA_score', 0)
+        elif vendor == 'amd': return req_row.get('GPU_AMD_score', 0)
+        elif vendor == 'intel': return req_row.get('GPU_Intel_score', 0)
+        else: return req_row.get('GPU_Intel_score', 0)
+
+    # Assign a score based on storage type
+    def get_storage_type_score(storage_type):
+        if pd.isna(storage_type): return 0
+        storage_type_lower = storage_type.lower()
+        if 'ssd' in storage_type_lower: return 1.0
+        elif 'hdd' in storage_type_lower: return 0.5
+        elif 'emmc' in storage_type_lower: return 0.3
+        else: return 0.0
+
+    def calculate_match(row):
+        cpu_req = get_cpu_req_score(row, req_row_rec)
+        gpu_req = get_gpu_req_score(row, req_row_rec)
+
+        # Avoid division by zero and handle potential NaN/inf
+        cpu_score_ratio = row['CPU_score'] / cpu_req if cpu_req > 0 and not pd.isna(row['CPU_score']) else (1.0 if cpu_req == 0 else 0.0)
+        gpu_score_ratio = row['GPU_score'] / gpu_req if gpu_req > 0 and not pd.isna(row['GPU_score']) else (1.0 if gpu_req == 0 else 0.0)
+        ram_score_ratio = (row['RAM'] / ram_req) * ram_weight if ram_req > 0 and not pd.isna(row['RAM']) else (1.0 if ram_req == 0 else 0.0)
+        storage_score_ratio = (row['Storage'] / storage_req) * storage_weight if storage_req > 0 and not pd.isna(row['Storage']) else (1.0 if storage_req == 0 else 0.0)
+        storage_type_score = get_storage_type_score(row['Storage type']) * storage_type_weight # Include storage type score
+
+        # Cap the ratios to prevent extreme values from dominating
+        cpu_score_ratio = min(cpu_score_ratio, 5.0)
+        gpu_score_ratio = min(gpu_score_ratio, 5.0)
+        ram_score_ratio = min(ram_score_ratio, 5.0)
+        storage_score_ratio = min(storage_score_ratio, 5.0)
+
+        # Ensure ratios are not NaN or Inf
+        cpu_score_ratio = 0.0 if pd.isna(cpu_score_ratio) or cpu_score_ratio == float('inf') else cpu_score_ratio
+        gpu_score_ratio = 0.0 if pd.isna(gpu_score_ratio) or gpu_score_ratio == float('inf') else gpu_score_ratio
+        ram_score_ratio = 0.0 if pd.isna(ram_score_ratio) or ram_score_ratio == float('inf') else ram_score_ratio
+        storage_score_ratio = 0.0 if pd.isna(storage_score_ratio) or storage_score_ratio == float('inf') else storage_score_ratio
+        storage_type_score = 0.0 if pd.isna(storage_type_score) or storage_type_score == float('inf') else storage_type_score
+
+
+        final_score = (cpu_score_ratio + gpu_score_ratio + ram_score_ratio + storage_score_ratio + storage_type_score) / (2 + ram_weight + storage_weight + storage_type_weight) # Adjust denominator
+        return final_score
+
+    def categorize(row):
+        cpu_min = get_cpu_req_score(row, req_row_min)
+        gpu_min = get_gpu_req_score(row, req_row_min)
+        cpu_rec = get_cpu_req_score(row, req_row_rec)
+        gpu_rec = get_gpu_req_score(row, req_row_rec)
+
+        # Ensure scores are not NaN before comparison
+        row_cpu_score = row['CPU_score'] if not pd.isna(row['CPU_score']) else -1
+        row_gpu_score = row['GPU_score'] if not pd.isna(row['GPU_score']) else -1
+        row_ram = row['RAM'] if not pd.isna(row['RAM']) else -1
+        row_storage = row['Storage'] if not pd.isna(row['Storage']) else -1
+
+        # Handle cases where req_row_min or req_row_rec might be missing keys
+        cpu_min = req_row_min.get('CPU_Intel_score', 0)
+        gpu_min = req_row_min.get('GPU_NVIDIA_score', 0)
+        cpu_rec = req_row_rec.get('CPU_Intel_score', 0)
+        gpu_rec = req_row_rec.get('GPU_NVIDIA_score', 0)
+
+
+        if row_cpu_score < cpu_min or row_gpu_score < gpu_min or row_ram < ram_req or row_storage < storage_req:
+             return 'Disqualified'
+
+        cpu_rec_flag = row_cpu_score >= cpu_rec
+        gpu_rec_flag = row_gpu_score >= gpu_rec
+
+        if cpu_rec_flag and gpu_rec_flag: return 'Recommended'
+        elif cpu_rec_flag or gpu_rec_flag: return 'Mixed'
+        else: return 'Minimum'
+
+    df_filtered_req = df_laptops_filtered[
+        (df_laptops_filtered['RAM'] >= ram_req) & (df_laptops_filtered['Storage'] >= storage_req)
+    ].copy()
+    print(f"Jumlah laptop setelah filter RAM/Storage minimum: {len(df_filtered_req)}")
+
+    if df_filtered_req.empty:
+         print("Tidak ada laptop yang memenuhi persyaratan RAM dan Storage minimum.")
+         return pd.DataFrame()
+
+
+    df_filtered_req['Match_Score'] = df_filtered_req.apply(calculate_match, axis=1)
+    df_filtered_req['Category'] = df_filtered_req.apply(categorize, axis=1)
+
+
+    df_final = df_filtered_req[df_filtered_req['Category'] != 'Disqualified'].copy()
+    df_final = df_final.sort_values(by='Match_Score', ascending=False).reset_index(drop=True)
+    return df_final[['Brand', 'Model', 'CPU', 'GPU', 'RAM', 'Storage', 'Storage type', 'Final Price', 'Category', 'Match_Score']] # Added Storage type
+
+
+from flask import Flask, request, jsonify
+
+app = Flask(__name__)
+
+@app.route("/recommend", methods=["GET", "POST"])
+def recommend_laptop():
+    user_query = ""
+    if request.method == "POST":
+        user_query = request.form.get("query") or (request.json.get("query") if request.is_json else None)
+    elif request.method == "GET":
+        user_query = request.args.get("query")
+
+    if not user_query:
+        return jsonify({"error": "Mohon berikan query untuk rekomendasi laptop."}), 400
+
+    print(f"Menerima query dari user: {user_query}")
+
+    # Pastikan semua variabel/fungsi ini sudah terdefinisi/import sebelumnya!
+    recommendations_df = get_laptop_recommendations_with_intent(
+        user_query, laptop_df, min_req_df, rec_req_df,
+        min_req_kb, rec_req_kb,
+        model, description_embeddings,
+        laptop_df['Model'].tolist(),
+        laptop_df['Brand'].unique().tolist(),
+        unique_keyword_game_map, game_series_map
+    )
+
+    recommendations_json = recommendations_df.to_dict('records')
+    return jsonify({"query": user_query, "recommendations": recommendations_json})
+
+if __name__ == '__main__':
+    app.run(debug=True)  # default port: 5000
