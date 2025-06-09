@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import "./App.css";
+import appData from "./lib/api.json";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -17,6 +18,8 @@ export type LaptopRecommendation = {
   Score?: number;
   Category?: string;
 };
+
+type AppDataItem = typeof appData[0];
 
 const App: React.FC = () => {
   const [stage, setStage] = useState<"init" | "welcome" | "loading" | "form" | "result">("init");
@@ -53,18 +56,56 @@ const App: React.FC = () => {
 
   const handleStart = () => setStage("welcome");
 
-  const handleSubmit = async () => {
-    if (!teks.trim()) return toast.error("Input kosong");
-    try {
-      const res = await axios.get<{ rekomendasi: LaptopRecommendation[] }>(
-        `http://localhost:5000/rekomendasi?teks=${encodeURIComponent(teks)}`
-      );
-      setRekomendasi(res.data.rekomendasi ?? []);
-      setStage("result");
-    } catch {
-      toast.error("Gagal mengambil data.");
-    }
-  };
+  // const handleSubmit = async () => {
+  //   if (!teks.trim()) return toast.error("Input kosong");
+  //   try {
+  //     const res = await axios.get<{ rekomendasi: LaptopRecommendation[] }>(
+  //       `http://localhost:5000/rekomendasi?teks=${encodeURIComponent(teks)}`
+  //     );
+  //     setRekomendasi(res.data.rekomendasi ?? []);
+  //     setStage("result");
+  //   } catch {
+  //     toast.error("Gagal mengambil data.");
+  //   }
+  // };
+
+const handleSubmit = () => {
+  if (!teks.trim()) return toast.error("Input kosong");
+
+  const query = teks.toLowerCase();
+  const matched = (appData as AppDataItem[]).filter((item) => {
+    const app = item.App.toLowerCase();
+    const desc = item.Description?.toLowerCase() || "";
+    const categories = item.Category?.join(", ").toLowerCase() || "";
+    return (
+      query.includes(app) ||
+      app.includes(query) ||
+      desc.includes(query) ||
+      categories.includes(query)
+    );
+  });
+
+  if (!matched.length) {
+    toast.error("Tidak ada rekomendasi ditemukan.");
+    return;
+  }
+
+  const hasil: LaptopRecommendation[] = matched.map((item) => ({
+    Brand: item.App,
+    Model: item.Description.slice(0, 30) + "...",
+    CPU: item.CPU_Intel || item.CPU_AMD || "-",
+    GPU: item.GPU_NVIDIA || item.GPU_AMD || item.GPU_Intel || "-",
+    Price: "Rp10.000.000", // Dummy price sementara
+    Category: item.Category.join(", "),
+    Score: Math.floor(
+      ((item.CPU_Intel_score ?? item.CPU_AMD_score ?? 0) +
+        (item.GPU_NVIDIA_score ?? item.GPU_AMD_score ?? item.GPU_Intel_score ?? 0)) / 2
+    ),
+  }));
+
+  setRekomendasi(hasil);
+  setStage("result");
+};
 
   const resetAll = () => {
     setTeks("");
