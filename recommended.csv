@@ -1,0 +1,7 @@
+"usage,category,cpu_recommended,gpu_recommended,ram_recommended"
+"Kantor,Umum,Intel Core i5-13600 / AMD Ryzen 5 7600,Intel Iris Xe / AMD Radeon 780M,16 GB"
+"Kuliah,Umum,Intel Core i7-13700 / AMD Ryzen 7 7700U,NVIDIA RTX 4060 / AMD RX 7600,32 GB"
+"Sekolah,Umum,Intel Core i5-13400 / AMD Ryzen 5 7600X,Intel Iris Xe / AMD Radeon 760M,16 GB"
+"Entrepreneur,Umum,Intel Core i9-13900 / AMD Ryzen 9 7900X,NVIDIA RTX 4070 / AMD RX 7800 XT,64 GB"
+"Content Creator,Umum,Intel Core i9-13900K / AMD Ryzen 9 7950X,NVIDIA RTX 4000 / AMD RX 7900 XTX, 64 GB"
+"Programming,Umum,Intel Core i7-13700 / AMD Ryzen 7 7800X3D,NVIDIA RTX 4070 / AMD RX 7700 XT,32 GB"

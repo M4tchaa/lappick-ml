@@ -1,0 +1,7 @@
+"usage,category,cpu_minimum,gpu_minimum,ram_minimum"
+"Kantor,Umum,Intel Core i3-10100 / AMD Ryzen 3 3100,Intel UHD Graphics 630 / AMD Radeon Vega 3,8 GB"
+"Kuliah,Umum,Intel Core i5-10400 / AMD Ryzen 5 3500U,Intel Iris Xe / AMD Radeon Vega 8,8 GB"
+"Sekolah,Umum,Intel Celeron G5905 / AMD Athlon 3000G,Intel UHD Graphics 610 / AMD Radeon Vega 3,4 GB"
+"Entrepreneur,Umum,Intel Core i5-11400 / AMD Ryzen 5 5600G,NVIDIA GTX 1650 / AMD Radeon RX 6400,16 GB"
+"Content Creator,Umum,Intel Core i5-12600K / AMD Ryzen 5 7600X,NVIDIA RTX 3060 / AMD Radeon RX 6600, 16 GB"
+"Programming,Umum,Intel Core i5-12400 / AMD Ryzen 5 5600G,Intel UHD Graphics 730 / AMD Radeon Graphics,16 GB"
